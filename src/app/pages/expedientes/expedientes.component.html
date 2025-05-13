@@ -1,3 +1,4 @@
+<p-toast />
 <div class="container">
   <p-fluid class="flex flex-col md:flex-row gap-8">
     <div class="md:w-1/2">
@@ -8,33 +9,33 @@
             <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
               <div class="flex flex-col gap-2" style="padding: 10px; width: 250px;">
                 <label for="sede">Sede</label>
-                <p-select id="sede" [(ngModel)]="sedeSeleccionada" [options]="sedes" optionLabel="nombre" placeholder="Seleccione Sede"></p-select>
+                <p-select id="sede" [(ngModel)]="sedeSeleccionada" [options]="sedes" optionLabel="sede" optionValue="codigoSede" placeholder="Seleccione Sede" (onChange)="onSedeChange($event)" #cbuSede [filter]="true" filterBy="sede"></p-select>
               </div>
             </div>
             <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
               <div class="flex flex-col gap-2" style="padding: 10px; width: 250px;">
                 <label for="instancia">Instancia</label>
-                <p-select id="instancia" [(ngModel)]="instanciaSeleccionada" [options]="instancias" optionLabel="nombre" placeholder="Seleccione Instancia"></p-select>
+                <p-select id="instancia" [(ngModel)]="instanciaSeleccionada" [options]="instanciasFiltradas" optionLabel="instancia" optionValue="codigoInstancia" placeholder="Seleccione Instancia" #cbuInstancia [filter]="true" filterBy="instancia"></p-select>
               </div>
             </div>
             <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
               <div class="flex flex-col gap-2" style="padding: 10px; width: 250px;">
                 <label for="especialidad">Especialidad</label>
-                <p-select id="especialidad" [(ngModel)]="especialidadSeleccionada" [options]="especialidades" optionLabel="nombre" placeholder="Seleccione Especialidad"></p-select>
+                <p-select id="especialidad" [(ngModel)]="especialidadSeleccionada" [options]="especialidades" optionLabel="especialidad" optionValue="codigoEspecialidad" placeholder="Seleccione Especialidad" #cbuEspecialidad [filter]="true" filterBy="especialidad"></p-select>
               </div>
             </div>
 
             <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
               <div class="flex flex-col gap-2" style="padding: 10px; width: 200px;">
                 <label for="numero">Número</label>
-                <input pInputText id="numero" [(ngModel)]="numeroExpediente" type="text">
+                <input pInputText id="numero" [(ngModel)]="numeroExpediente" type="text" appSoloNumerosEnteros #inputNumeroExp>
               </div>
             </div>
 
             <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
               <div class="flex flex-col gap-2" style="padding: 10px; width: 200px;">
                 <label for="anio">Año</label>
-                <input pInputText id="numero" [(ngModel)]="anioExpediente" type="text">
+                <input pInputText id="numero" [(ngModel)]="anioExpediente" type="text" appSoloNumerosEnteros #inputAnio>
               </div>
             </div>
 
@@ -52,6 +53,43 @@
 
   <br>
 
+  <p-dialog [(visible)]="displayGenerarDocumentos" [breakpoints]="{ '960px': '75vw' }" [style]="{ width: '30vw' }" [modal]="true" [contentStyle]="{'overflow':'visible'}">
+    <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2" style="color: white;">
+            <span class="font-bold whitespace-nowrap">GENERAR DOCUMENTO CON INTELIGENCIA ARTIFICIAL</span>
+        </div>
+    </ng-template>
+
+      <div class="flex flex-row flex-wrap">
+        <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
+          <div class="flex flex-col gap-2" style="padding: 10px; width: 250px;">
+            <label for="tipoDoc">Tipo de Documento</label>
+            <p-select id="tipoDoc" [(ngModel)]="tipoDocumentoSeleccionado" [options]="tipoDocumentos" optionLabel="nombre" optionValue="code" placeholder="Seleccione Tipo de Documento" #cbuTipoDocumento></p-select>
+          </div>
+        </div>
+        <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
+          <div class="flex flex-col gap-2" style="padding: 10px; width: 250px;">
+            <label for="tipoActo">Tipo Acto Procesal</label>
+            <p-select id="tipoActo" [(ngModel)]="tipoActoProcesalSeleccionado" [options]="tipoActoProcesales" optionLabel="nombre" optionValue="code" placeholder="Seleccione Tipo Acto Procesal" #cbuActoProcesal></p-select>
+          </div>
+        </div>
+
+        <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
+          <div class="flex flex-col gap-2" style="padding: 10px; width: 200px; display: flex; justify-content: flex-end;">
+            <div class="search-button">
+              <p-button label="Generar" icon="pi pi-microchip-ai" (onClick)="buscarExpedientes()" size="large"></p-button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ng-template #footer>
+        <div class="inline-flex" style="width: 100%;">
+          <hr>
+          <p-button label="Cerrar" (click)="close()" icon="pi pi-times" />
+        </div>
+      </ng-template>
+  </p-dialog>
+
   <div class="p-fluid box">
     <div class="p-field p-grid">
       <div class="results-table">
@@ -67,11 +105,12 @@
           </ng-template>
           <ng-template pTemplate="body" let-expediente>
             <tr>
-              <td>{{ expediente.nroExpediente }}</td>
-              <td>{{ expediente.instanciaActual }}</td>
-              <td>{{ expediente.ubicacion }}</td>
-              <td>{{ expediente.estado }}</td>
+              <td>{{ expediente.fullNumeroExpediente }}</td>
+              <td>{{ expediente.instancia }}</td>
+              <td></td>
+              <td></td>
               <td>
+                <p-button label="" icon="pi pi-list" (onClick)="actionExpediente(expediente)" pTooltip="Generar Documento con Inteligencia Artificial"></p-button>
                 </td>
             </tr>
           </ng-template>

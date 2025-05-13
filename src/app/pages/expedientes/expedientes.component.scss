@@ -19,7 +19,15 @@
   background-color: #b00600 !important;
   border: 1px solid #f76969 !important;
   //box-shadow: 0 0 0 0.2rem rgba(176, 6, 0, 0.25) !important; // opcional: sombra roja suave
+  color: white !important;
   &:hover {
     background-color: #ef4444 !important;
   }
+}
+
+::ng-deep .p-dialog .p-dialog-header {
+  background-color: #b00600 !important;; /* tu color deseado */
+  border-color: #b00600 !important;
+  border-top-left-radius: 10px;    /* ajusta el valor según lo que use tu dialog */
+  border-top-right-radius: 10px;
 }

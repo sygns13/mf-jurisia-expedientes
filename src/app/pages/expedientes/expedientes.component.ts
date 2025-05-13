@@ -16,7 +16,13 @@ import { MenuItem } from 'primeng/api';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { ConsultagptService } from 'src/app/services/consultagpt.service';
 import { IRequest, GptResponse, GptHistoryItem, HistoryResponse } from 'src/app/interfaces/consultagpt';
+import { ExpedientesService } from 'src/app/services/expedientes.service';
+import { Sede, Instancia, Especialidad, Expediente, BusquedaExpediente } from 'src/app/interfaces/expedientes';
 import { marked } from 'marked';
+import { SoloNumerosEnterosDirective } from '../directives/solo-numeros-enteros.directive';
+import { Dropdown } from 'primeng/dropdown';
+import { TooltipModule } from 'primeng/tooltip';
+import { DialogModule } from 'primeng/dialog';
 
 const environment = (window as any).__env as any;
 
@@ -28,7 +34,7 @@ interface ChatMessage {
 
 @Component({
   selector: 'app-expedientes',
-  imports: [CommonModule, SelectModule , TableModule, InputTextModule, FluidModule, ButtonModule, FormsModule, TextareaModule, MessageModule, ToastModule, PanelMenuModule, PaginatorModule],
+  imports: [CommonModule, SelectModule , TableModule, InputTextModule, FluidModule, ButtonModule, FormsModule, TextareaModule, MessageModule, ToastModule, PanelMenuModule, PaginatorModule, SoloNumerosEnterosDirective, TooltipModule, DialogModule],
   providers: [MessageService],
   templateUrl: './expedientes.component.html',
   styleUrl: './expedientes.component.scss'
@@ -37,26 +43,77 @@ export class ExpedientesComponent {
 
   private env = environment;
 
-  sedes: any[] = [];
-  sedeSeleccionada: any = null;
-  instancias: any[] = [];
-  instanciaSeleccionada: any = null;
-  especialidades: any[] = [];
-  especialidadSeleccionada: any = null;
+  @ViewChild('cbuSede', { static: false }) cbuSede!: Dropdown;
+  @ViewChild('cbuInstancia', { static: false }) cbuInstancia!: Dropdown;
+  @ViewChild('cbuEspecialidad', { static: false }) cbuEspecialidad!: Dropdown;
+  @ViewChild('inputNumeroExp', { static: false }) inputNumeroExp!: ElementRef;
+  @ViewChild('inputAnio', { static: false }) inputAnio!: ElementRef;
+
+  sedes: Sede[] = [];
+  sedeSeleccionada: string | null = null;
+  instancias: Instancia[] = [];
+  instanciasFiltradas: Instancia[] = []; // Lista de instancias filtradas por sede
+  instanciaSeleccionada: string | null = null;
+  especialidades: Especialidad[] = [];
+  especialidadSeleccionada: string | null = null;
   numeroExpediente: number | null = null;
   anioExpediente: number | null = null;
-  expedientes: any[] = [];
+
+  buscarExpediente: BusquedaExpediente | null = null
+  expedientes: Expediente[] = [];
+
+  displayGenerarDocumentos: boolean = false;
+
+  tipoDocumentos : any[] = [
+    {'code': '1', 'nombre': 'RESOLUCIÓN'},
+    {'code': '2', 'nombre': 'OFICIO'}
+  ];
+
+  tipoDocumentoSeleccionado : any = null;
+
+   tipoActoProcesales : any[] = [
+    {'code': '1', 'nombre': 'AUTO IMPROCEDENTE'},
+    {'code': '2', 'nombre': 'AUTO INADMISIBLE'},
+    {'code': '3', 'nombre': 'DECRETO'},
+    {'code': '4', 'nombre': 'SENTENCIA DE VISTA'},
+    {'code': '5', 'nombre': 'SOBRESEIMIENTO'},
+  ];
+
+  tipoActoProcesalSeleccionado : any = null;
 
   constructor(
     private service: MessageService,
-    private consultagptService: ConsultagptService) {
+    private consultagptService: ConsultagptService,
+    private expedientesService: ExpedientesService) {
 
     console.log('Environment from Microfront:');
     console.log(this.env);
   }
 
   ngOnInit() {
-    //this.loadConversationHistory();
+    this.loadSedes();
+    this.loadInstancias();
+    this.loadEspecialidades();
+  }
+
+  setFocusCbuSede() {
+    this.cbuSede.focus();
+  }
+
+  setFocusCbuInstancia() {
+    this.cbuInstancia.focus();
+  }
+
+  setFocusNumeroExp() {
+    this.inputNumeroExp.nativeElement.focus();
+  }
+
+  setFocusAnio() {
+    this.inputAnio.nativeElement.focus();
+  }
+
+  setFocusCbuEspecialidad() {
+    this.cbuEspecialidad.focus();
   }
 
   ngAfterViewChecked() {
@@ -65,6 +122,121 @@ export class ExpedientesComponent {
 
   buscarExpedientes() {
 
+    if(!this.validarBusquedaExpedientes()){
+      return;
+    }
+
+    this.buscarExpediente = {} as BusquedaExpediente;
+
+    this.buscarExpediente.sede = this.sedeSeleccionada ?? '';
+    this.buscarExpediente.instancia = this.instanciaSeleccionada ?? '';
+    this.buscarExpediente.especialidad = this.especialidadSeleccionada ?? '';
+    this.buscarExpediente.numero = this.numeroExpediente ?? 0;
+    this.buscarExpediente.anio = this.anioExpediente ?? 0;
+    
+    this.expedientesService.consultaCabExpedientes(this.buscarExpediente).subscribe({
+      next: (expedientes: Expediente[]) => {
+        this.expedientes = expedientes;
+
+        if(expedientes.length <= 0){
+          this.service.add({ severity: 'info', summary: 'Info', detail: 'No se encontraron expedientes con los criterios de búsqueda ingresados' });
+        }
+      },
+      error: (err) => {
+        // this.isTyping = false;
+        this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo buscar expedientes. Consulte al Administrador del Sistema' });
+        console.error('Error al cargar conversación previa', err);
+      }
+    });
+
   }
+
+  validarBusquedaExpedientes() : boolean{
+    if(this.sedeSeleccionada == null){
+      this.service.add({ severity: 'error', summary: 'Error', detail: 'Debe de seleccionar una Sede' });
+      this.setFocusCbuSede();
+      return false;
+    }
+
+    if(this.instanciaSeleccionada == null){
+      this.service.add({ severity: 'error', summary: 'Error', detail: 'Debe de seleccionar una Instancia' });
+      this.setFocusCbuSede();
+      return false;
+    }
+
+    if(this.especialidadSeleccionada == null){
+      this.service.add({ severity: 'error', summary: 'Error', detail: 'Debe de seleccionar una Especialidad' });
+      this.setFocusCbuEspecialidad();
+      return false;
+    }
+
+    if(this.numeroExpediente == null || this.numeroExpediente < 0){
+      this.service.add({ severity: 'error', summary: 'Error', detail: 'Ingrese un número de expediente válido' });
+      this.setFocusNumeroExp();
+      return false;
+    }
+
+    if(this.anioExpediente == null || this.anioExpediente < 1900){
+      this.service.add({ severity: 'error', summary: 'Error', detail: 'Ingrese un año válido mayor a 1900' });
+      this.setFocusAnio();
+      return false;
+    }
+
+    return true;
+  }
+
+  loadSedes(){
+    this.expedientesService.getSedes().subscribe({
+      next: (response: Sede[]) => {
+        this.sedes = response;
+      },
+      error: (err) => {
+        console.error('Error al cargar historial', err);
+      }
+    });
+  }
+
+  loadInstancias(){
+    this.expedientesService.getInstancias().subscribe({
+      next: (response: Instancia[]) => {
+        this.instancias = response;
+      },
+      error: (err) => {
+        console.error('Error al cargar historial', err);
+      }
+    });
+  }
+
+  loadEspecialidades(){
+    this.expedientesService.getEspecialidades().subscribe({
+      next: (response: Especialidad[]) => {
+        this.especialidades = response;
+      },
+      error: (err) => {
+        console.error('Error al cargar historial', err);
+      }
+    });
+  }
+
+  onSedeChange(event: any) {
+    //this.sedeSeleccionada = event.value;
+    this.instanciaSeleccionada = null; // Resetear la selección de instancia
+    if (this.sedeSeleccionada) {
+      this.instanciasFiltradas = this.instancias.filter(instancia => instancia.codigoSede === this.sedeSeleccionada);
+    } else {
+      this.instanciasFiltradas = []; // Si no hay sede seleccionada, no mostrar nada
+    }
+    console.log('Sede seleccionada:', this.sedeSeleccionada);
+    console.log('Instancias filtradas:', this.instanciasFiltradas);
+  }
+
+  actionExpediente(expediente: Expediente){
+    console.log(expediente);
+    this.displayGenerarDocumentos = true;
+  }
+
+  close() {
+        this.displayGenerarDocumentos = false;
+    }
 
 }
