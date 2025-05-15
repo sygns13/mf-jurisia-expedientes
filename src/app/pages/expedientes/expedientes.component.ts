@@ -54,6 +54,7 @@ export class ExpedientesComponent {
   instancias: Instancia[] = [];
   instanciasFiltradas: Instancia[] = []; // Lista de instancias filtradas por sede
   instanciaSeleccionada: string | null = null;
+  especialidadesFiltradas: Especialidad[] = [];
   especialidades: Especialidad[] = [];
   especialidadSeleccionada: string | null = null;
   numeroExpediente: number | null = null;
@@ -223,11 +224,25 @@ export class ExpedientesComponent {
     this.instanciaSeleccionada = null; // Resetear la selección de instancia
     if (this.sedeSeleccionada) {
       this.instanciasFiltradas = this.instancias.filter(instancia => instancia.codigoSede === this.sedeSeleccionada);
+      this.especialidadesFiltradas = []; // Limpiar Especialidades
     } else {
       this.instanciasFiltradas = []; // Si no hay sede seleccionada, no mostrar nada
+      this.especialidadesFiltradas = []; // Limpiar Especialidades
     }
     console.log('Sede seleccionada:', this.sedeSeleccionada);
     console.log('Instancias filtradas:', this.instanciasFiltradas);
+  }
+
+  onInstanciaChange(event: any) {
+    //this.instanciaSeleccionada = event.value;
+    this.especialidadSeleccionada = null; // Resetear la selección de especialidad
+    if (this.instanciaSeleccionada) {
+      this.especialidadesFiltradas = this.especialidades.filter(especialidad => especialidad.codigoInstancia === this.instanciaSeleccionada);
+    } else {
+      this.especialidadesFiltradas = []; // Si no hay sede seleccionada, no mostrar nada
+    }
+    console.log('Instancia seleccionada:', this.instanciaSeleccionada);
+    console.log('Especialidades filtradas:', this.especialidadesFiltradas);
   }
 
   actionExpediente(expediente: Expediente){

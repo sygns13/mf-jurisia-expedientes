@@ -18,6 +18,7 @@ export interface Especialidad {
   codigoEspecialidad: string;
   especialidad: string;
   codigoCodEspecialidad: string;
+  codigoInstancia: string;
 }
 
 export interface Instancia {
@@ -45,5 +46,11 @@ export interface Expediente {
   organo: string;
   especialidad: string;
   instancia: string;
+  descMateria: string;
+  fechaCreacion: string;
+  descEstado: string;
+  ubicacion: string;
+  descUbicacion: string;
+  tipoExpediente: string;
   nunico: number;
 }
