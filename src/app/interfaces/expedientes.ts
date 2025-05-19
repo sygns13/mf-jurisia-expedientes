@@ -45,6 +45,7 @@ export interface Expediente {
   sede: string;
   organo: string;
   especialidad: string;
+  codigoInstancia: string;
   instancia: string;
   descMateria: string;
   fechaCreacion: string;

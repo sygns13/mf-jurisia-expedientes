@@ -18,11 +18,15 @@ import { ConsultagptService } from 'src/app/services/consultagpt.service';
 import { IRequest, GptResponse, GptHistoryItem, HistoryResponse } from 'src/app/interfaces/consultagpt';
 import { ExpedientesService } from 'src/app/services/expedientes.service';
 import { Sede, Instancia, Especialidad, Expediente, BusquedaExpediente } from 'src/app/interfaces/expedientes';
+import { TipodocumentoService } from 'src/app/services/tipodocumento.service';
+import { DocumentoService } from 'src/app/services/documento.service';
 import { marked } from 'marked';
 import { SoloNumerosEnterosDirective } from '../directives/solo-numeros-enteros.directive';
 import { Dropdown } from 'primeng/dropdown';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
+import { TipoDocumento } from 'src/app/interfaces/tipodocumento';
+import { Documento } from 'src/app/interfaces/documento';
 
 const environment = (window as any).__env as any;
 
@@ -60,11 +64,20 @@ export class ExpedientesComponent {
   numeroExpediente: number | null = null;
   anioExpediente: number | null = null;
 
+  tipoDocumentosFiltrados: TipoDocumento[] = [];
+  tipoDocumentos: TipoDocumento[] = [];
+  tipoDocumentoSeleccionado: number | null = null;
+
+  documentosFiltrados: Documento[] = [];
+  documentos: Documento[] = [];
+  documentoSeleccionado: number | null = null;
+
   buscarExpediente: BusquedaExpediente | null = null
   expedientes: Expediente[] = [];
 
   displayGenerarDocumentos: boolean = false;
 
+  /*
   tipoDocumentos : any[] = [
     {'code': '1', 'nombre': 'RESOLUCIÓN'},
     {'code': '2', 'nombre': 'OFICIO'}
@@ -82,9 +95,12 @@ export class ExpedientesComponent {
 
   tipoActoProcesalSeleccionado : any = null;
 
+  */
+
   constructor(
     private service: MessageService,
-    private consultagptService: ConsultagptService,
+    private documentoService: DocumentoService,
+    private tipodocumentoService: TipodocumentoService,
     private expedientesService: ExpedientesService) {
 
     console.log('Environment from Microfront:');
@@ -95,6 +111,8 @@ export class ExpedientesComponent {
     this.loadSedes();
     this.loadInstancias();
     this.loadEspecialidades();
+    this.loadTipoDocumentos();
+    this.loadDocumentos();
   }
 
   setFocusCbuSede() {
@@ -192,7 +210,7 @@ export class ExpedientesComponent {
         this.sedes = response;
       },
       error: (err) => {
-        console.error('Error al cargar historial', err);
+        console.error('Error al cargar sedes', err);
       }
     });
   }
@@ -203,7 +221,7 @@ export class ExpedientesComponent {
         this.instancias = response;
       },
       error: (err) => {
-        console.error('Error al cargar historial', err);
+        console.error('Error al cargar instancias', err);
       }
     });
   }
@@ -214,7 +232,7 @@ export class ExpedientesComponent {
         this.especialidades = response;
       },
       error: (err) => {
-        console.error('Error al cargar historial', err);
+        console.error('Error al cargar especialidades', err);
       }
     });
   }
@@ -222,12 +240,11 @@ export class ExpedientesComponent {
   onSedeChange(event: any) {
     //this.sedeSeleccionada = event.value;
     this.instanciaSeleccionada = null; // Resetear la selección de instancia
+    this.especialidadesFiltradas = []; // Limpiar Especialidades
     if (this.sedeSeleccionada) {
       this.instanciasFiltradas = this.instancias.filter(instancia => instancia.codigoSede === this.sedeSeleccionada);
-      this.especialidadesFiltradas = []; // Limpiar Especialidades
     } else {
       this.instanciasFiltradas = []; // Si no hay sede seleccionada, no mostrar nada
-      this.especialidadesFiltradas = []; // Limpiar Especialidades
     }
     console.log('Sede seleccionada:', this.sedeSeleccionada);
     console.log('Instancias filtradas:', this.instanciasFiltradas);
@@ -247,11 +264,56 @@ export class ExpedientesComponent {
 
   actionExpediente(expediente: Expediente){
     console.log(expediente);
+    this.tipoDocumentoLoad(expediente);
     this.displayGenerarDocumentos = true;
   }
 
   close() {
         this.displayGenerarDocumentos = false;
     }
+
+    loadTipoDocumentos(){
+    this.tipodocumentoService.getTipoDocumentos().subscribe({
+      next: (response: TipoDocumento[]) => {
+        this.tipoDocumentos = response;
+      },
+      error: (err) => {
+        console.error('Error al cargar tipo de cumentos', err);
+      }
+    });
+  }
+
+  loadDocumentos(){
+    this.documentoService.getDocumentos().subscribe({
+      next: (response: Documento[]) => {
+        this.documentos = response;
+      },
+      error: (err) => {
+        console.error('Error al cargar documentos', err);
+      }
+    });
+  }
+
+  tipoDocumentoLoad(expediente: Expediente) {
+
+    this.documentoSeleccionado = null; // Resetear la selección de Tipo Documento
+    this.tipoDocumentoSeleccionado = null; // Resetear la selección de Documento
+    this.documentosFiltrados = [];
+    if (expediente) {
+      this.tipoDocumentosFiltrados = this.tipoDocumentos.filter(tipoDocumentos => tipoDocumentos.idInstancia === expediente.codigoInstancia);
+    } else {
+      this.tipoDocumentosFiltrados = []; // Si no hay sede seleccionada, no mostrar nada
+    }
+  }
+
+  onTipoDocumentoChange(event: any) {
+    //this.instanciaSeleccionada = event.value;
+    this.documentoSeleccionado = null; // Resetear la selección de especialidad
+    if (this.tipoDocumentoSeleccionado) {
+      this.documentosFiltrados = this.documentos.filter(documentos => documentos.idTipoDocumento === this.tipoDocumentoSeleccionado);
+    } else {
+      this.documentosFiltrados = []; // Si no hay sede seleccionada, no mostrar nada
+    }
+  }
 
 }

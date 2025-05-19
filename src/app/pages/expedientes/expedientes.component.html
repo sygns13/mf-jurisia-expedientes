@@ -64,13 +64,13 @@
         <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
           <div class="flex flex-col gap-2" style="padding: 10px; width: 250px;">
             <label for="tipoDoc">Tipo de Documento</label>
-            <p-select id="tipoDoc" [(ngModel)]="tipoDocumentoSeleccionado" [options]="tipoDocumentos" optionLabel="nombre" optionValue="code" placeholder="Seleccione Tipo de Documento" #cbuTipoDocumento></p-select>
+            <p-select id="tipoDoc" [(ngModel)]="tipoDocumentoSeleccionado" [options]="tipoDocumentosFiltrados" (onChange)="onTipoDocumentoChange($event)" optionLabel="descripcion" optionValue="idTipoDocumento" placeholder="Seleccione Tipo de Documento" #cbuTipoDocumento></p-select>
           </div>
         </div>
         <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
           <div class="flex flex-col gap-2" style="padding: 10px; width: 250px;">
-            <label for="tipoActo">Tipo Acto Procesal</label>
-            <p-select id="tipoActo" [(ngModel)]="tipoActoProcesalSeleccionado" [options]="tipoActoProcesales" optionLabel="nombre" optionValue="code" placeholder="Seleccione Tipo Acto Procesal" #cbuActoProcesal></p-select>
+            <label for="documento">Documento</label>
+            <p-select id="documento" [(ngModel)]="documentoSeleccionado" [options]="documentosFiltrados" optionLabel="descripcion" optionValue="idDocumento" placeholder="Seleccione Documento" #cbuDocumento></p-select>
           </div>
         </div>
 
