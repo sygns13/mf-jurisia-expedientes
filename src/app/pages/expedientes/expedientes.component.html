@@ -20,10 +20,11 @@
       </div>
     </div>
   </p-fluid>
-
+ 
   <br>
+    
 
-  <p-dialog [(visible)]="displayGenerarDocumentos" [breakpoints]="{ '960px': '75vw' }" [style]="{ width: '30vw' }" [modal]="true" [contentStyle]="{'overflow':'visible'}">
+  <p-dialog [(visible)]="displayGenerarDocumentos" [breakpoints]="{ '960px': '75vw' }" [style]="{ width: '30vw' }" [modal]="true" [contentStyle]="{'overflow':'visible'}" [closable]="!isTypingWord">
     <ng-template #header>
         <div class="inline-flex items-center justify-center gap-2" style="color: white;">
             <span class="font-bold whitespace-nowrap">GENERAR DOCUMENTO CON APUBOT</span>
@@ -49,11 +50,18 @@
           <hr style="width: 100%; border: none; border-top: 1px solid #ccc; margin-bottom: 1rem;margin-top: 0px!important;">
           <div style="display: flex; justify-content: flex-end;">
             <button pButton
+                    label="Descargar Documento"
+                    icon="pi pi-download"
+                    (click)="descargarDocumentoDirecto(); displayFiltroExpedientes = false;"
+                    class="redbutton"
+                    [style]="{ width: 'auto' }">
+            </button>
+            <button pButton
                     label="Generar Documento"
                     icon="pi pi-microchip-ai"
                     (click)="generarDocumento(); displayFiltroExpedientes = false;"
                     class="redbutton"
-                    [style]="{ width: 'auto' }">
+                    style="width: auto;margin-left: 1rem!important;">
             </button>
           </div>
         </div>
@@ -69,10 +77,10 @@
     [draggable]="false"
     class="dialog-typing"
     [style]="{ width: '300px' }"
-  >
+  > 
     <ng-template pTemplate="header">
       <div class="dialog-header-centered">
-        <i class="pi pi-info-circle icon-alert" style="font-size: 1.2rem;color: #f97316"></i>
+        <i class="pi pi-info-circle icon-alert" style="font-size: 1.2rem;color: #ffffff"></i>
         <span class="title-text" style="font-size: 1.2rem;margin-left: 0.8rem;color: #ffffff;font-weight: bold">{{ loaderMessage }}</span>
       </div>
     </ng-template>
@@ -83,6 +91,15 @@
         type="image/svg+xml"
         class="typing-animation">
       </object>
+      <div class="boton-centrado">
+        <button *ngIf="botonLoader"
+                pButton
+                label="Aceptar"
+                class="redbutton"
+                style="margin-top: 1rem;"
+                (click)="cerrarLoader()">
+        </button>
+      </div>
     </div>
   </p-dialog>
 <!--END LOADER-->
@@ -209,9 +226,46 @@
       </div>
     </div>
   </ng-template>
-
-
 </p-dialog>
+
+<p-dialog
+  [(visible)]="mostrarDialogoPreview"
+  [modal]="true"
+  [closable]="!isTypingWord"
+  [dismissableMask]="false"
+  [baseZIndex]="11000"
+  [style]="{ width: '50vw', height: '100vh' }"
+  [contentStyle]="{ overflow: 'hidden', background: '#e5e7eb', padding: '3rem', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }"
+  [draggable]="false" 
+> 
+ <ng-template #header>
+        <div class="inline-flex items-center justify-center gap-2" style="color: white;">
+            <span class="font-bold whitespace-nowrap">GENERANDO DOCUMENTO CON APUBOT</span>
+        </div>
+    </ng-template>
+  <!-- Contenedor con scroll personalizado -->
+  <div #scrollContainer class="scroll-container">
+
+    <!-- Simula una hoja de Word -->
+    <div #contenidoContainer class="word-sheet">
+      <div [innerHTML]="contenidoHTMLAnimado"></div>
+      <div *ngIf="isTypingWord" style="display: flex; align-items: center; margin-top: 1rem;">
+        <object data="assets/animations/ApuBotTyping.svg" type="image/svg+xml" width="40" height="40"></object>
+        <span style="margin-left: 1rem; font-style: italic;">Redactando su Documento...</span>
+      </div>
+      <button *ngIf="!isTypingWord"
+              pButton
+              label="Descargar Word"
+              icon="pi pi-download"
+              class="p-button-success"
+              style="margin-top: 1rem;"
+              (click)="descargarDocumento()">
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+
 
 
 

@@ -11,14 +11,30 @@
 :host ::ng-deep .p-datatable-gridlines .p-datatable-thead > tr > th {
   background-color: #f1f5f9 !important;
 }
+
+.contenido-escrito {
+  animation: blink-cursor 1s steps(1) infinite;
+  border-right: 2px solid black;
+}
+
+@keyframes blink-cursor {
+  0%, 100% { border-color: transparent; }
+  50% { border-color: black; }
+}
+
 .results-table{
   padding: 1rem;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
+} 
+
 .dialog-typing{
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.boton-centrado {
+  display: flex;
+  justify-content: center;
 }
 .redbutton {
   background-color: #b00600 !important;
@@ -32,13 +48,14 @@
     background-color: #ef4444 !important;
   }
 }
+
 ::ng-deep .p-dialog-content {
   padding: 1.5rem !important;
 }
 
 :host ::ng-deep .p-select:not(.p-disabled).p-focus {
   border-color: #b00600 !important;
-  box-shadow: 0 0 0 0.2rem rgba(176, 6, 0, 0.25) !important; // opcional: sombra roja suave
+  box-shadow: 0 0 0 0.2rem rgba(176, 6, 0, 0.25) !important;
 }
 
 :host ::ng-deep .p-select-option.p-select-option-selected {
@@ -50,7 +67,6 @@
   border-color: #b00600 !important;
   background-color: #b00600 !important;
   border: 1px solid #f76969 !important;
-  //box-shadow: 0 0 0 0.2rem rgba(176, 6, 0, 0.25) !important; // opcional: sombra roja suave
   color: white !important;
   &:hover {
     background-color: #ef4444 !important;
@@ -58,8 +74,285 @@
 }
 
 ::ng-deep .p-dialog .p-dialog-header {
-  background-color: #b00600 !important;; /* tu color deseado */
+  background-color: #b00600 !important;
   border-color: #b00600 !important;
-  border-top-left-radius: 10px;    /* ajusta el valor según lo que use tu dialog */
+  border-top-left-radius: 10px;
   border-top-right-radius: 10px;
+}
+
+.scroll-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  
+  // Personalizar scrollbar
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f3f4;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
+}
+
+.word-sheet {
+  background-color: white;
+  padding: 3rem;
+  width: 794px; // A4 width
+  min-height: auto;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  font-family: 'Arial', sans-serif;
+  font-size: 12pt;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+  margin: 1rem 0;
+
+  // ============================================
+  // ESTILOS MEJORADOS PARA EL PROCESAMIENTO HTML
+  // ============================================
+
+  // Estilos para párrafos - justificación FORZADA
+  p {
+    margin-bottom: 1rem;
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    word-spacing: normal !important;
+    letter-spacing: normal !important;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    
+    // Forzar justificación en todos los navegadores
+    -moz-text-align-last: auto;
+    text-align-last: auto;
+  }
+
+  // Estilos para texto en negrita (palabras en mayúsculas y números)
+  strong {
+    font-weight: bold !important;
+    color: #000 !important;
+    // Evitar que las negritas rompan la justificación
+    display: inline;
+    white-space: normal; // Cambié de nowrap a normal para evitar problemas
+  }
+
+  // Estilos específicos para títulos con dos puntos
+  .title-section {
+    display: block !important; // Cambiar a block para líneas independientes
+    font-weight: bold !important;
+    font-size: 1em;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: #000 !important;
+    text-align: left !important; // Los títulos no se justifican
+    line-height: 1.4;
+    
+    // Asegurar que esté en su propia línea
+    &::before {
+      content: '';
+      display: block;
+      height: 0.5rem;
+    }
+    
+    &::after {
+      content: '';
+      display: block;
+      height: 0.3rem;
+    }
+  }
+
+  // Mejorar el aspecto de los saltos de línea
+  br {
+    line-height: 1.8;
+    
+    // Asegurar que los saltos de línea después de títulos funcionen
+    + br {
+      line-height: 0.5;
+    }
+  }
+
+  // ============================================
+  // ESTILOS ORIGINALES MEJORADOS
+  // ============================================
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    text-align: left !important; // Los títulos no se justifican
+    color: #000;
+  }
+
+  em {
+    font-style: italic;
+    color: #000;
+  }
+
+  ul, ol {
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+    
+    li {
+      margin-bottom: 0.5rem;
+      text-align: justify !important;
+      text-justify: inter-word !important;
+    }
+  }
+
+  // Agregar altura mínima dinámicamente solo cuando el contenido esté completo
+  &.full-document {
+    min-height: 1123px;
+  }
+
+  // Mejorar la renderización del texto
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  // ============================================
+  // MEJORAS ESPECÍFICAS PARA JUSTIFICACIÓN
+  // ============================================
+
+  // Forzar justificación en todo el contenido
+  * {
+    text-align: inherit;
+  }
+
+  // Estilos específicos para diferentes tipos de contenido
+  div, span {
+    text-align: justify;
+    text-justify: inter-word;
+  }
+
+  // Evitar que elementos inline rompan la justificación
+  strong, em, span, a {
+    text-align: inherit;
+  }
+
+  // ============================================
+  // MEJORAS PARA EL EFECTO DE ESCRITURA
+  // ============================================
+
+  .typing-content {
+    word-break: break-word;
+    hyphens: auto;
+    text-align: justify !important;
+  }
+
+  // Evitar que se vean elementos cortados durante la animación
+  *:last-child {
+    margin-bottom: 0;
+  }
+
+  // Estilo para contenido que se está escribiendo
+  &.typing {
+    .title-section {
+      min-height: 1.2em;
+    }
+    
+    // Mantener justificación durante la escritura
+    p {
+      text-align: justify !important;
+    }
+  }
+
+  // ============================================
+  // ESTILOS PARA CASOS ESPECIALES
+  // ============================================
+  // NOTA: Los estilos específicos para números de expediente y años
+  // se manejan a través del procesamiento HTML en TypeScript,
+  // no a través de CSS ya que no se pueden usar :contains() o :matches()
+}
+
+// ============================================
+// ESTILOS PARA EL DIÁLOGO DE PREVIEW
+// ============================================
+
+.preview-dialog {
+  .word-sheet {
+    box-shadow: none;
+    margin: 0;
+    
+    // Asegurar justificación en el diálogo también
+    p {
+      text-align: justify !important;
+      text-justify: inter-word !important;
+    }
+  }
+}
+
+// ============================================
+// RESPONSIVE DESIGN
+// ============================================
+
+@media (max-width: 768px) {
+  .word-sheet {
+    width: 100%;
+    padding: 1.5rem;
+    margin: 0.5rem 0;
+    font-size: 11pt;
+    
+    // Mantener justificación en móviles
+    p {
+      text-align: justify !important;
+    }
+  }
+}
+
+// ============================================
+// ANIMACIONES
+// ============================================
+
+@keyframes fadeInBold {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.word-sheet strong {
+  animation: fadeInBold 0.3s ease-in-out;
+}
+
+// ============================================
+// FIXES ADICIONALES PARA COMPATIBILIDAD
+// ============================================
+
+// Asegurar que la justificación funcione en todos los navegadores
+.word-sheet {
+  // Para Firefox
+  -moz-text-align-last: auto;
+  
+  // Para Safari
+  -webkit-text-align-last: auto;
+  
+  // Para Edge/IE
+  -ms-text-align-last: auto;
+  
+  p {
+    // Fallback para navegadores antiguos
+    text-align: justify;
+    text-align-last: left;
+    
+    // Soporte moderno
+    text-justify: inter-word;
+    word-spacing: 0.1em;
+  }
 }

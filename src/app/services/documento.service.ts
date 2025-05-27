@@ -24,5 +24,10 @@ export class DocumentoService {
     const url = `${baseUrl}/documento/generar-documento-web/${nUnico}/${codigoTemplate}`;
     return this.http.get<ResponseDocumentHTML>(url);
   }
+  descargarDocx(nUnico: number, codigoTemplate: string): Observable<Blob> {
+    const url = `${baseUrl}/documento/generar-documento-docx/${nUnico}/${codigoTemplate}`;
+    return this.http.get(url, { responseType: 'blob' });
+  }
+
 
 }

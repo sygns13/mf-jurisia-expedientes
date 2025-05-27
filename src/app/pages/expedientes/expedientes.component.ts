@@ -52,11 +52,14 @@ export class ExpedientesComponent {
   @ViewChild('cbuEspecialidad', { static: false }) cbuEspecialidad!: Dropdown;
   @ViewChild('inputNumeroExp', { static: false }) inputNumeroExp!: ElementRef;
   @ViewChild('inputAnio', { static: false }) inputAnio!: ElementRef;
+  @ViewChild('contenidoContainer') contenidoContainer!: ElementRef;
+ @ViewChild('scrollContainer', { static: false }) scrollContainer!: ElementRef;
+
 
   sedes: Sede[] = [];
   sedeSeleccionada: string | null = null;
   instancias: Instancia[] = [];
-  instanciasFiltradas: Instancia[] = []; // Lista de instancias filtradas por sede
+  instanciasFiltradas: Instancia[] = [];
   instanciaSeleccionada: string | null = null;
   especialidadesFiltradas: Especialidad[] = [];
   especialidades: Especialidad[] = [];
@@ -68,6 +71,8 @@ export class ExpedientesComponent {
   tipoDocumentos: TipoDocumento[] = [];
   tipoDocumentoSeleccionado: number | null = null;
   isTyping: boolean = false;
+  botonLoader: boolean = false;
+  isTypingWord: boolean = false;
   loaderMessage: string = '';
   nunico: number = 0;
 
@@ -79,28 +84,17 @@ export class ExpedientesComponent {
   expedientes: Expediente[] = [];
 
   displayGenerarDocumentos: boolean = false;
+
   displayFiltroExpedientes: boolean = false;
 
+  // tipado de documento
+  contenidoHTML: string = '';
+  contenidoHTMLAnimado: string = '';
+  mostrarDialogoPreview: boolean = false;
+  velocidadEscritura: number = 2; // milisegundos por caracter
 
-  /*
-  tipoDocumentos : any[] = [
-    {'code': '1', 'nombre': 'RESOLUCIÓN'},
-    {'code': '2', 'nombre': 'OFICIO'}
-  ];
-
-  tipoDocumentoSeleccionado : any = null;
-
-   tipoActoProcesales : any[] = [
-    {'code': '1', 'nombre': 'AUTO IMPROCEDENTE'},
-    {'code': '2', 'nombre': 'AUTO INADMISIBLE'},
-    {'code': '3', 'nombre': 'DECRETO'},
-    {'code': '4', 'nombre': 'SENTENCIA DE VISTA'},
-    {'code': '5', 'nombre': 'SOBRESEIMIENTO'},
-  ];
-
-  tipoActoProcesalSeleccionado : any = null;
-
-  */
+  private isFirstRender: boolean = true;
+  private lastScrollHeight: number = 0;
 
   constructor(
     private service: MessageService,
@@ -171,6 +165,8 @@ export class ExpedientesComponent {
         }
       },
       error: (err) => {
+        this.isTyping = false;
+        this.loaderMessage = ''
         // this.isTyping = false;
         this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo buscar expedientes. Consulte al Administrador del Sistema' });
         console.error('Error al cargar conversación previa', err);
@@ -259,23 +255,21 @@ export class ExpedientesComponent {
   }
 
   onSedeChange(event: any) {
-    //this.sedeSeleccionada = event.value;
-    this.instanciaSeleccionada = null; // Resetear la selección de instancia
-    this.especialidadesFiltradas = []; // Limpiar Especialidades
+    this.instanciaSeleccionada = null; 
+    this.especialidadesFiltradas = [];
     if (this.sedeSeleccionada) {
       this.instanciasFiltradas = this.instancias.filter(instancia => instancia.codigoSede === this.sedeSeleccionada);
     } else {
-      this.instanciasFiltradas = []; // Si no hay sede seleccionada, no mostrar nada
+      this.instanciasFiltradas = []; 
     }
   }
 
   onInstanciaChange(event: any) {
-    //this.instanciaSeleccionada = event.value;
-    this.especialidadSeleccionada = null; // Resetear la selección de especialidad
+    this.especialidadSeleccionada = null;
     if (this.instanciaSeleccionada) {
       this.especialidadesFiltradas = this.especialidades.filter(especialidad => especialidad.codigoInstancia === this.instanciaSeleccionada);
     } else {
-      this.especialidadesFiltradas = []; // Si no hay sede seleccionada, no mostrar nada
+      this.especialidadesFiltradas = [];
     }
   }
 
@@ -285,7 +279,7 @@ export class ExpedientesComponent {
     this.displayGenerarDocumentos = true;
   }
 
-  close() {
+  closeAntes() {
         this.displayGenerarDocumentos = false;
     }
 
@@ -313,29 +307,93 @@ export class ExpedientesComponent {
 
   tipoDocumentoLoad(expediente: Expediente) {
 
-    this.documentoSeleccionado = null; // Resetear la selección de Tipo Documento
-    this.tipoDocumentoSeleccionado = null; // Resetear la selección de Documento
+    this.documentoSeleccionado = null;
+    this.tipoDocumentoSeleccionado = null;
     this.documentosFiltrados = [];
     this.nunico=expediente.nunico;
     if (expediente) {
       this.tipoDocumentosFiltrados = this.tipoDocumentos.filter(tipoDocumentos => tipoDocumentos.idInstancia === expediente.codigoInstancia);
     } else {
-      this.tipoDocumentosFiltrados = []; // Si no hay sede seleccionada, no mostrar nada
+      this.tipoDocumentosFiltrados = [];
     }
   }
+
 
   onTipoDocumentoChange(event: any) {
     console.log("Entra Aqui");
-    //this.instanciaSeleccionada = event.value;
-    this.documentoSeleccionado = null; // Resetear la selección de especialidad
+    this.documentoSeleccionado = null;
     if (this.tipoDocumentoSeleccionado) {
       this.documentosFiltrados = this.documentos.filter(documentos => documentos.idTipoDocumento === this.tipoDocumentoSeleccionado);
     } else {
-      this.documentosFiltrados = []; // Si no hay sede seleccionada, no mostrar nada
+      this.documentosFiltrados = [];
     }
   }
 
-  generarDocumento() {
+descargarDocumento() {
+  const documento = this.documentos.find(d => d.idDocumento === this.documentoSeleccionado);
+  const codigoTemplate = documento?.codigoTemplate;
+  const nameDoc = documento?.descripcion;
+  if (!codigoTemplate || !this.nunico) return;
+
+  this.documentoService.descargarDocx(this.nunico, codigoTemplate).subscribe({
+    next: (response: Blob) => {
+      const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = nameDoc+'-'+this.nunico+'.docx';
+      link.click();
+      window.URL.revokeObjectURL(url);
+    },
+    error: () => {
+      this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo descargar el documento.' });
+    }
+  });
+}
+
+descargarDocumentoDirecto() {
+  if (!this.tipoDocumentoSeleccionado || !this.documentoSeleccionado) {
+      this.service.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Debe seleccionar el tipo de documento y el documento antes de descargar.'
+      });
+      return;
+    }
+
+    this.isTyping = true;
+    this.loaderMessage = 'Generando documento...'
+
+  const documento = this.documentos.find(d => d.idDocumento === this.documentoSeleccionado);
+  const codigoTemplate = documento?.codigoTemplate;
+  const nameDoc = documento?.descripcion;
+  if (!codigoTemplate || !this.nunico) return;
+
+  this.documentoService.descargarDocx(this.nunico, codigoTemplate).subscribe({
+    next: (response: Blob) => {
+      const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = nameDoc+'-'+this.nunico+'.docx';
+      link.click();
+      window.URL.revokeObjectURL(url);
+      this.botonLoader=true;
+      this.loaderMessage = 'Documento Generado, revise sus descargas'
+    },
+    error: () => {
+      this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo descargar el documento.' });
+    }
+  });
+}
+
+cerrarLoader(){
+  this.botonLoader=false;
+  this.isTyping = false;
+  this.loaderMessage = ''
+}
+
+generarDocumento() {
     if (!this.tipoDocumentoSeleccionado || !this.documentoSeleccionado) {
       this.service.add({
         severity: 'info',
@@ -348,26 +406,200 @@ export class ExpedientesComponent {
     const documento = this.documentos.find(d => d.idDocumento === this.documentoSeleccionado);
     const codigoTemplate = documento?.codigoTemplate;
 
-    console.log('ID seleccionado:', this.documentoSeleccionado);
-    console.log('Código Template:', codigoTemplate);
-    console.log('n_unico:', this.nunico);
-
     this.documentoService.getDocumentoGenerado(this.nunico, codigoTemplate!).subscribe({
       next: (resp) => {
-        console.log('Documento generado:', resp);
         if (resp.success) {
-          this.service.add({ severity: 'success', summary: 'Éxito', detail: 'Documento generado correctamente' });
+          this.contenidoHTML = this.procesarHTML(resp.contentHTML);
+          this.contenidoHTMLAnimado = '';
+          this.isTypingWord = false;
+          
+          this.mostrarDialogoPreview = true;
+          setTimeout(() => {
+            // Pasar el HTML ya procesado a la simulación de escritura
+            this.simularEscritura(this.contenidoHTML);
+          }, 500); 
         } else {
           this.service.add({ severity: 'warn', summary: 'Advertencia', detail: 'El documento no se generó correctamente.' });
         }
       },
       error: (err) => {
-        console.error('Error al generar documento:', err);
         this.service.add({ severity: 'error', summary: 'Error', detail: 'Hubo un problema al generar el documento.' });
       }
     });
   }
 
+simularEscritura(html: string) {
+  this.isTypingWord = true;
+  this.contenidoHTMLAnimado = '';
+  let i = 0;
+  
+  this.forceScrollToTop();
+  
+  const intervalo = setInterval(() => {
+    this.contenidoHTMLAnimado += html.charAt(i);
+    i++;
+    
+    if (i > 200) { 
+      this.conditionalScroll();
+    }
+    
+    if (i >= html.length) {
+      clearInterval(intervalo);
+      this.isTypingWord = false;
+      
+      this.addFullDocumentClass();
 
+      setTimeout(() => this.scrollPreviewBottom(), 500);
+    }
+  }, this.velocidadEscritura);
+}
+
+forceScrollToTop() {
+  const resetScroll = () => {
+    if (this.scrollContainer && this.scrollContainer.nativeElement) {
+      this.scrollContainer.nativeElement.scrollTop = 0;
+    }
+  };
+  
+  resetScroll();
+  setTimeout(resetScroll, 10);
+  setTimeout(resetScroll, 50);
+  setTimeout(resetScroll, 100);
+}
+
+conditionalScroll() {
+  if (!this.scrollContainer?.nativeElement) return;
+  
+  const scrollElement = this.scrollContainer.nativeElement;
+  const containerHeight = scrollElement.clientHeight;
+  const contentHeight = scrollElement.scrollHeight;
+  const currentScroll = scrollElement.scrollTop;
+  
+  if (contentHeight > containerHeight) {
+    const distanceFromBottom = contentHeight - (currentScroll + containerHeight);
+    
+    if (distanceFromBottom < 200) {
+      scrollElement.scrollTo({
+        top: contentHeight - containerHeight + 50,
+        behavior: 'smooth'
+      });
+    }
+  }
+}
+
+addFullDocumentClass() {
+  setTimeout(() => {
+    if (this.contenidoContainer?.nativeElement) {
+      this.contenidoContainer.nativeElement.classList.add('full-document');
+    }
+  }, 100);
+}
+
+scrollPreviewBottom() {
+  if (!this.scrollContainer?.nativeElement) return;
+  
+  const scrollElement = this.scrollContainer.nativeElement;
+  scrollElement.scrollTo({
+    top: scrollElement.scrollHeight,
+    behavior: 'smooth'
+  });
+}
+
+close() {
+  this.displayGenerarDocumentos = false;
+  this.mostrarDialogoPreview = false;
+  
+  this.contenidoHTMLAnimado = '';
+  this.isTypingWord = false;
+
+  if (this.contenidoContainer?.nativeElement) {
+    this.contenidoContainer.nativeElement.classList.remove('full-document');
+  }
+}
+
+  private procesarTexto(texto: string): string {
+  let textoProcessado = texto;
+  
+  // 1. PRIMERO: Procesar palabras con dos puntos para crear títulos/secciones
+  // Captura palabras que terminan en ":" (pueden ser mayúsculas o minúsculas)
+  // Ejemplo: "Tercero:", "Cuarto:", "CONSIDERANDO:", etc.
+  textoProcessado = textoProcessado.replace(
+    /\b([A-ZÁÉÍÓÚÑÜ][a-záéíóúñüA-ZÁÉÍÓÚÑÜ\s]*[a-záéíóúñüA-ZÁÉÍÓÚÑÜ]):\s*/g,
+    '<br><strong class="title-section">$1:</strong><br>'
+  );
+  
+  // 2. SEGUNDO: Procesar todas las palabras en MAYÚSCULAS (incluyendo números y caracteres especiales)
+  // Este regex captura:
+  // - Palabras completamente en mayúsculas
+  // - Números mezclados con mayúsculas
+  // - Caracteres especiales como guiones en expedientes (ej: "EXP-2024-001")
+  textoProcessado = textoProcessado.replace(
+    /\b([A-ZÁÉÍÓÚÑÜ0-9]+(?:[-\.\/][A-ZÁÉÍÓÚÑÜ0-9]+)*[A-ZÁÉÍÓÚÑÜ0-9]*)\b(?!\s*<\/strong>)(?!:)/g,
+    (match, word) => {
+      // Solo aplicar negrita si la palabra tiene al menos 2 caracteres
+      // y contiene al menos una letra mayúscula
+      if (word.length >= 2 && /[A-ZÁÉÍÓÚÑÜ]/.test(word)) {
+        return `<strong>${word}</strong>`;
+      }
+      return match;
+    }
+  );
+  
+  // 3. TERCERO: Procesar casos especiales como números de expediente
+  // Ejemplo: "N° 123-2024", "EXP N° 456-2023", etc.
+  textoProcessado = textoProcessado.replace(
+    /\b(N°?\s*\d+(?:[-\/]\d+)*)\b/gi,
+    '<strong>$1</strong>'
+  );
+  
+  // 4. CUARTO: Procesar años (4 dígitos) que no estén ya en negritas
+  textoProcessado = textoProcessado.replace(
+    /\b(19\d{2}|20\d{2})\b(?![^<]*<\/strong>)/g,
+    '<strong>$1</strong>'
+  );
+  
+  // 5. QUINTO: Limpiar casos donde se aplicó negrita múltiples veces
+  textoProcessado = textoProcessado.replace(
+    /<strong><strong>(.*?)<\/strong><\/strong>/g,
+    '<strong>$1</strong>'
+  );
+  
+  // 6. SEXTO: Limpiar múltiples saltos de línea consecutivos
+  textoProcessado = textoProcessado.replace(/(<br>\s*){3,}/g, '<br><br>');
+  
+  // 7. SÉPTIMO: Limpiar saltos de línea al inicio y final
+  textoProcessado = textoProcessado.replace(/^(<br>\s*)+/, '');
+  textoProcessado = textoProcessado.replace(/(<br>\s*)+$/, '');
+  
+  return textoProcessado;
+}
+
+// También actualiza la función procesarHTML para asegurar la justificación
+private procesarHTML(contentHTML: string): string {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = contentHTML;
+  
+  const paragraphs = tempDiv.querySelectorAll('p');
+  
+  paragraphs.forEach(p => {
+    const text = p.textContent || '';
+    const processedHTML = this.procesarTexto(text);
+    p.innerHTML = processedHTML;
+    
+    // Aplicar justificación de manera más robusta
+    p.style.textAlign = 'justify';
+    p.style.setProperty('text-justify', 'inter-word');
+    p.style.wordSpacing = 'normal';
+    p.style.letterSpacing = 'normal';
+  }); 
+  
+  // Si no hay párrafos, procesar el contenido completo
+  if (paragraphs.length === 0) {
+    const processedHTML = this.procesarTexto(tempDiv.textContent || '');
+    tempDiv.innerHTML = `<p style="text-align: justify; text-justify: inter-word;">${processedHTML}</p>`;
+  }
+  
+  return tempDiv.innerHTML;
+}
 
 }
