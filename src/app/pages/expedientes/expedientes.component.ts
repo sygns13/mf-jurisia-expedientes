@@ -67,6 +67,9 @@ export class ExpedientesComponent {
   tipoDocumentosFiltrados: TipoDocumento[] = [];
   tipoDocumentos: TipoDocumento[] = [];
   tipoDocumentoSeleccionado: number | null = null;
+  isTyping: boolean = false;
+  loaderMessage: string = '';
+  nunico: number = 0;
 
   documentosFiltrados: Documento[] = [];
   documentos: Documento[] = [];
@@ -76,6 +79,8 @@ export class ExpedientesComponent {
   expedientes: Expediente[] = [];
 
   displayGenerarDocumentos: boolean = false;
+  displayFiltroExpedientes: boolean = false;
+
 
   /*
   tipoDocumentos : any[] = [
@@ -152,11 +157,15 @@ export class ExpedientesComponent {
     this.buscarExpediente.especialidad = this.especialidadSeleccionada ?? '';
     this.buscarExpediente.numero = this.numeroExpediente ?? 0;
     this.buscarExpediente.anio = this.anioExpediente ?? 0;
-    
+
+    this.isTyping = true;
+    this.loaderMessage = 'Buscando el expediente...'
+
     this.expedientesService.consultaCabExpedientes(this.buscarExpediente).subscribe({
       next: (expedientes: Expediente[]) => {
         this.expedientes = expedientes;
-
+        this.isTyping = false;
+        this.loaderMessage = ''
         if(expedientes.length <= 0){
           this.service.add({ severity: 'info', summary: 'Info', detail: 'No se encontraron expedientes con los criterios de búsqueda ingresados' });
         }
@@ -208,6 +217,18 @@ export class ExpedientesComponent {
     this.expedientesService.getSedes().subscribe({
       next: (response: Sede[]) => {
         this.sedes = response;
+        if (this.sedes.length > 0) {
+          this.sedeSeleccionada = this.sedes[0].codigoSede;
+          this.expedientesService.getInstancias().subscribe({
+            next: (response: Instancia[]) => {
+              this.instancias = response;
+              this.onSedeChange({ value: this.sedeSeleccionada });
+            },
+            error: (err) => {
+              console.error('Error al cargar instancias', err);
+            }
+          });
+        }
       },
       error: (err) => {
         console.error('Error al cargar sedes', err);
@@ -246,8 +267,6 @@ export class ExpedientesComponent {
     } else {
       this.instanciasFiltradas = []; // Si no hay sede seleccionada, no mostrar nada
     }
-    console.log('Sede seleccionada:', this.sedeSeleccionada);
-    console.log('Instancias filtradas:', this.instanciasFiltradas);
   }
 
   onInstanciaChange(event: any) {
@@ -258,8 +277,6 @@ export class ExpedientesComponent {
     } else {
       this.especialidadesFiltradas = []; // Si no hay sede seleccionada, no mostrar nada
     }
-    console.log('Instancia seleccionada:', this.instanciaSeleccionada);
-    console.log('Especialidades filtradas:', this.especialidadesFiltradas);
   }
 
   actionExpediente(expediente: Expediente){
@@ -299,6 +316,7 @@ export class ExpedientesComponent {
     this.documentoSeleccionado = null; // Resetear la selección de Tipo Documento
     this.tipoDocumentoSeleccionado = null; // Resetear la selección de Documento
     this.documentosFiltrados = [];
+    this.nunico=expediente.nunico;
     if (expediente) {
       this.tipoDocumentosFiltrados = this.tipoDocumentos.filter(tipoDocumentos => tipoDocumentos.idInstancia === expediente.codigoInstancia);
     } else {
@@ -307,6 +325,7 @@ export class ExpedientesComponent {
   }
 
   onTipoDocumentoChange(event: any) {
+    console.log("Entra Aqui");
     //this.instanciaSeleccionada = event.value;
     this.documentoSeleccionado = null; // Resetear la selección de especialidad
     if (this.tipoDocumentoSeleccionado) {
@@ -315,5 +334,40 @@ export class ExpedientesComponent {
       this.documentosFiltrados = []; // Si no hay sede seleccionada, no mostrar nada
     }
   }
+
+  generarDocumento() {
+    if (!this.tipoDocumentoSeleccionado || !this.documentoSeleccionado) {
+      this.service.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Debe seleccionar el tipo de documento y el documento antes de generar.'
+      });
+      return;
+    }
+
+    const documento = this.documentos.find(d => d.idDocumento === this.documentoSeleccionado);
+    const codigoTemplate = documento?.codigoTemplate;
+
+    console.log('ID seleccionado:', this.documentoSeleccionado);
+    console.log('Código Template:', codigoTemplate);
+    console.log('n_unico:', this.nunico);
+
+    this.documentoService.getDocumentoGenerado(this.nunico, codigoTemplate!).subscribe({
+      next: (resp) => {
+        console.log('Documento generado:', resp);
+        if (resp.success) {
+          this.service.add({ severity: 'success', summary: 'Éxito', detail: 'Documento generado correctamente' });
+        } else {
+          this.service.add({ severity: 'warn', summary: 'Advertencia', detail: 'El documento no se generó correctamente.' });
+        }
+      },
+      error: (err) => {
+        console.error('Error al generar documento:', err);
+        this.service.add({ severity: 'error', summary: 'Error', detail: 'Hubo un problema al generar el documento.' });
+      }
+    });
+  }
+
+
 
 }

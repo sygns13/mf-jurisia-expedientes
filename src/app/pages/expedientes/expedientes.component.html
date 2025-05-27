@@ -3,50 +3,20 @@
   <p-fluid class="flex flex-col md:flex-row gap-8">
     <div class="md:w-1/2">
       <div class="card flex flex-col gap-4">
-          <h3>Buscar Expedientes</h3>
-
-          <div class="flex flex-row flex-wrap">
-            <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
-              <div class="flex flex-col gap-2" style="padding: 10px; width: 250px;">
-                <label for="sede">Sede</label>
-                <p-select id="sede" [(ngModel)]="sedeSeleccionada" [options]="sedes" optionLabel="sede" optionValue="codigoSede" placeholder="Seleccione Sede" (onChange)="onSedeChange($event)" #cbuSede [filter]="true" filterBy="sede"></p-select>
-              </div>
-            </div>
-            <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
-              <div class="flex flex-col gap-2" style="padding: 10px; width: 250px;">
-                <label for="instancia">Instancia</label>
-                <p-select id="instancia" [(ngModel)]="instanciaSeleccionada" [options]="instanciasFiltradas" optionLabel="instancia" optionValue="codigoInstancia" placeholder="Seleccione Instancia" (onChange)="onInstanciaChange($event)" #cbuInstancia [filter]="true" filterBy="instancia"></p-select>
-              </div>
-            </div>
-            <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
-              <div class="flex flex-col gap-2" style="padding: 10px; width: 250px;">
-                <label for="especialidad">Especialidad</label>
-                <p-select id="especialidad" [(ngModel)]="especialidadSeleccionada" [options]="especialidadesFiltradas" optionLabel="especialidad" optionValue="codigoEspecialidad" placeholder="Seleccione Especialidad" #cbuEspecialidad [filter]="true" filterBy="especialidad"></p-select>
-              </div>
-            </div>
-
-            <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
-              <div class="flex flex-col gap-2" style="padding: 10px; width: 200px;">
-                <label for="numero">Número</label>
-                <input pInputText id="numero" [(ngModel)]="numeroExpediente" type="text" appSoloNumerosEnteros #inputNumeroExp>
-              </div>
-            </div>
-
-            <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
-              <div class="flex flex-col gap-2" style="padding: 10px; width: 200px;">
-                <label for="anio">Año</label>
-                <input pInputText id="numero" [(ngModel)]="anioExpediente" type="text" appSoloNumerosEnteros #inputAnio>
-              </div>
-            </div>
-
-            <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
-              <div class="flex flex-col gap-2" style="padding: 10px; width: 200px; display: flex; justify-content: flex-end;">
-                <div class="search-button">
-                  <p-button label="Buscar" icon="pi pi-search" (onClick)="buscarExpedientes()"></p-button>
-                </div>
-              </div>
-            </div>
-          </div>
+        <h3>Generación de Documentos por Expedientes</h3>
+        <div class="m-2">
+          <button pButton label="Listar Expedientes" icon="pi pi-search" (click)="displayFiltroExpedientes = true" class="redbutton" [style]="{ width: 'auto' }"></button>
+        </div>
+        <!-- Alineado a la derecha <div class="flex justify-between items-center m-2">
+          <h3 class="m-0">Generación de Documentos por Expedientes</h3>
+          <p-button
+            label="Listar Expedientes"
+            icon="pi pi-search"
+            (onClick)="displayFiltroExpedientes = true"
+            styleClass="p-button-danger"
+            [style]="{ width: 'auto' }">
+          </p-button>
+        </div>-->
       </div>
     </div>
   </p-fluid>
@@ -56,7 +26,7 @@
   <p-dialog [(visible)]="displayGenerarDocumentos" [breakpoints]="{ '960px': '75vw' }" [style]="{ width: '30vw' }" [modal]="true" [contentStyle]="{'overflow':'visible'}">
     <ng-template #header>
         <div class="inline-flex items-center justify-center gap-2" style="color: white;">
-            <span class="font-bold whitespace-nowrap">GENERAR DOCUMENTO CON INTELIGENCIA ARTIFICIAL</span>
+            <span class="font-bold whitespace-nowrap">GENERAR DOCUMENTO CON APUBOT</span>
         </div>
     </ng-template>
 
@@ -73,22 +43,49 @@
             <p-select id="documento" [(ngModel)]="documentoSeleccionado" [options]="documentosFiltrados" optionLabel="descripcion" optionValue="idDocumento" placeholder="Seleccione Documento" #cbuDocumento></p-select>
           </div>
         </div>
-
-        <div class="flex align-items-center justify-content-center w-5rem h-5rem font-bold border-round m-2">
-          <div class="flex flex-col gap-2" style="padding: 10px; width: 200px; display: flex; justify-content: flex-end;">
-            <div class="search-button">
-              <p-button label="Generar" icon="pi pi-microchip-ai" (onClick)="buscarExpedientes()" size="large"></p-button>
-            </div>
-          </div>
-        </div>
       </div>
       <ng-template #footer>
-        <div class="inline-flex" style="width: 100%;">
-          <hr>
-          <p-button label="Cerrar" (click)="close()" icon="pi pi-times" />
+        <div style="width: 100%;">
+          <hr style="width: 100%; border: none; border-top: 1px solid #ccc; margin-bottom: 1rem;margin-top: 0px!important;">
+          <div style="display: flex; justify-content: flex-end;">
+            <button pButton
+                    label="Generar Documento"
+                    icon="pi pi-microchip-ai"
+                    (click)="generarDocumento(); displayFiltroExpedientes = false;"
+                    class="redbutton"
+                    [style]="{ width: 'auto' }">
+            </button>
+          </div>
         </div>
       </ng-template>
   </p-dialog>
+
+  <!--Loader ApuBot-->
+  <p-dialog
+    [(visible)]="isTyping"
+    modal="true"
+    [closable]="false"
+    [dismissableMask]="true"
+    [draggable]="false"
+    class="dialog-typing"
+    [style]="{ width: '300px' }"
+  >
+    <ng-template pTemplate="header">
+      <div class="dialog-header-centered">
+        <i class="pi pi-info-circle icon-alert" style="font-size: 1.2rem;color: #f97316"></i>
+        <span class="title-text" style="font-size: 1.2rem;margin-left: 0.8rem;color: #ffffff;font-weight: bold">{{ loaderMessage }}</span>
+      </div>
+    </ng-template>
+
+    <div class="dialog-content">
+      <object
+        data="assets/animations/ApuBotTyping.svg"
+        type="image/svg+xml"
+        class="typing-animation">
+      </object>
+    </div>
+  </p-dialog>
+<!--END LOADER-->
 
   <div class="p-fluid box">
     <div class="p-field p-grid">
@@ -100,6 +97,7 @@
               <th>Instancia Actual</th>
               <th>Ubicación</th>
               <th>Estado</th>
+              <th>Tipo Expediente</th>
               <th>Acciones</th>
             </tr>
           </ng-template>
@@ -109,6 +107,7 @@
               <td>{{ expediente.instancia }}</td>
               <td>{{ expediente.descUbicacion }}</td>
               <td>{{ expediente.descEstado }}</td>
+              <td>{{ expediente.tipoExpediente }}</td>
               <td>
                 <p-button label="" icon="pi pi-list" (onClick)="actionExpediente(expediente)" pTooltip="Generar Documento con Inteligencia Artificial"></p-button>
                 </td>
@@ -123,5 +122,96 @@
       </div>
     </div>
   </div>
-  
+
 </div>
+
+<!-- LISTAR EXPEDIENTES -->
+<p-dialog [(visible)]="displayFiltroExpedientes"
+          [breakpoints]="{ '960px': '75vw' }"
+          [style]="{ width: '45vw' }"
+          [modal]="true"
+          [contentStyle]="{ 'overflow': 'visible' }">
+
+  <ng-template #header>
+    <div class="inline-flex items-center justify-center gap-2" style="color: white;">
+      <span class="font-bold whitespace-nowrap">LISTAR EXPEDIENTE</span>
+    </div>
+  </ng-template>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+    <!-- Contenedor individual -->
+    <div style="flex: 0 0 calc(50% - 16px); box-sizing: border-box;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label for="sede">Sede</label>
+        <p-select id="sede" [(ngModel)]="sedeSeleccionada"
+                  [options]="sedes"
+                  optionLabel="sede"
+                  optionValue="codigoSede"
+                  placeholder="Seleccione Sede"
+                  (onChange)="onSedeChange($event)"
+                  [filter]="true" filterBy="sede">
+        </p-select>
+      </div>
+    </div>
+
+    <div style="flex: 0 0 calc(50% - 16px); box-sizing: border-box;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label for="instancia">Instancia</label>
+        <p-select id="instancia" [(ngModel)]="instanciaSeleccionada"
+                  [options]="instanciasFiltradas"
+                  optionLabel="instancia"
+                  optionValue="codigoInstancia"
+                  placeholder="Seleccione Instancia"
+                  (onChange)="onInstanciaChange($event)"
+                  [filter]="true" filterBy="instancia">
+        </p-select>
+      </div>
+    </div>
+
+    <div style="flex: 0 0 calc(33.333% - 16px); box-sizing: border-box;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label for="especialidad">Especialidad</label>
+        <p-select id="especialidad" [(ngModel)]="especialidadSeleccionada"
+                  [options]="especialidadesFiltradas"
+                  optionLabel="especialidad"
+                  optionValue="codigoEspecialidad"
+                  placeholder="Seleccione Especialidad"
+                  [filter]="true" filterBy="especialidad">
+        </p-select>
+      </div>
+    </div>
+
+    <div style="flex: 0 0 calc(33.333% - 16px); box-sizing: border-box;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label for="numero">Número</label>
+        <input pInputText id="numero" [(ngModel)]="numeroExpediente"
+             type="text" appSoloNumerosEnteros />
+      </div>
+    </div>
+    <div style="flex: 0 0 calc(33.333% - 16px); box-sizing: border-box;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label for="anio">Año</label>
+        <input pInputText id="anio" [(ngModel)]="anioExpediente" type="text" appSoloNumerosEnteros />
+      </div>
+    </div>
+  </div>
+  <ng-template #footer>
+    <div style="width: 100%;">
+      <hr style="width: 100%; border: none; border-top: 1px solid #ccc; margin-bottom: 1rem;margin-top: 0px!important;">
+      <div style="display: flex; justify-content: flex-end;">
+        <button pButton
+                label="Buscar"
+                icon="pi pi-search"
+                (click)="buscarExpedientes(); displayFiltroExpedientes = false;"
+                class="redbutton"
+                [style]="{ width: 'auto' }">
+        </button>
+      </div>
+    </div>
+  </ng-template>
+
+
+</p-dialog>
+
+
+
