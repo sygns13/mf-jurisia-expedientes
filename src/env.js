@@ -8,7 +8,7 @@
       "API_GATEWAY_URL": "http://localhost:8020",
       "AUTH_GRANT_TYPE": "password",
       "AUTH_CLIENTID": "appjurisia",
-      "AUTH_SECRET": "FLSl4WBvhPqhTUfICEShYeihxDuCPcJy",
+      "AUTH_SECRET": "US2Pb4eljpZERhQ5KHHoDQ8fce1osVd7",
       "AUTH_TOKEN_NAME": "access_token_jurisia",
       "AUTH_REFRESH_TOKEN": "refresh_token_jurisia",
       "KEY_USER_ID": "preferred_username",

@@ -335,6 +335,9 @@ descargarDocumento() {
   const nameDoc = documento?.descripcion;
   if (!codigoTemplate || !this.nunico) return;
 
+  this.isTyping = true;
+  this.loaderMessage = 'Preparando documento...'
+
   this.documentoService.descargarDocx(this.nunico, codigoTemplate).subscribe({
     next: (response: Blob) => {
       const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
@@ -344,6 +347,8 @@ descargarDocumento() {
       link.download = nameDoc+'-'+this.nunico+'.docx';
       link.click();
       window.URL.revokeObjectURL(url);
+      this.botonLoader=true;
+      this.loaderMessage = 'Documento Generado, revise sus descargas'
     },
     error: () => {
       this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo descargar el documento.' });
@@ -406,6 +411,9 @@ generarDocumento() {
     const documento = this.documentos.find(d => d.idDocumento === this.documentoSeleccionado);
     const codigoTemplate = documento?.codigoTemplate;
 
+    this.isTyping = true;
+    this.loaderMessage = 'Preparando documento...'
+
     this.documentoService.getDocumentoGenerado(this.nunico, codigoTemplate!).subscribe({
       next: (resp) => {
         if (resp.success) {
@@ -413,6 +421,9 @@ generarDocumento() {
           this.contenidoHTMLAnimado = '';
           this.isTypingWord = false;
           
+          this.isTyping = false;
+          this.loaderMessage = ''
+
           this.mostrarDialogoPreview = true;
           setTimeout(() => {
             // Pasar el HTML ya procesado a la simulación de escritura
