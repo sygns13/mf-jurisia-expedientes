@@ -20,12 +20,12 @@ export class DocumentoService {
       return this.http.get<Documento[]>(`${baseUrl}/documento`);
     }
 
-  getDocumentoGenerado(nUnico: number, codigoTemplate: string): Observable<ResponseDocumentHTML> {
-    const url = `${baseUrl}/documento/generar-documento-web/${nUnico}/${codigoTemplate}`;
+  getDocumentoGenerado(nUnico: number, codigoTemplate: string, idDocumento: number): Observable<ResponseDocumentHTML> {
+    const url = `${baseUrl}/documento/generar-documento-web/${nUnico}/${codigoTemplate}/${idDocumento}`;
     return this.http.get<ResponseDocumentHTML>(url);
   }
-  descargarDocx(nUnico: number, codigoTemplate: string): Observable<Blob> {
-    const url = `${baseUrl}/documento/generar-documento-docx/${nUnico}/${codigoTemplate}`;
+  descargarDocx(nUnico: number, codigoTemplate: string, idDocumento: number): Observable<Blob> {
+    const url = `${baseUrl}/documento/generar-documento-docx/${nUnico}/${codigoTemplate}/${idDocumento}`;
     return this.http.get(url, { responseType: 'blob' });
   }
 

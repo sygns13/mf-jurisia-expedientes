@@ -335,7 +335,7 @@ descargarDocumento() {
   const nameDoc = documento?.descripcion;
   if (!codigoTemplate || !this.nunico) return;
 
-  this.documentoService.descargarDocx(this.nunico, codigoTemplate).subscribe({
+  this.documentoService.descargarDocx(this.nunico, codigoTemplate, documento.idDocumento).subscribe({
     next: (response: Blob) => {
       const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
       const url = window.URL.createObjectURL(blob);
@@ -369,7 +369,7 @@ descargarDocumentoDirecto() {
   const nameDoc = documento?.descripcion;
   if (!codigoTemplate || !this.nunico) return;
 
-  this.documentoService.descargarDocx(this.nunico, codigoTemplate).subscribe({
+  this.documentoService.descargarDocx(this.nunico, codigoTemplate, documento.idDocumento).subscribe({
     next: (response: Blob) => {
       const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
       const url = window.URL.createObjectURL(blob);
@@ -406,7 +406,12 @@ generarDocumento() {
     const documento = this.documentos.find(d => d.idDocumento === this.documentoSeleccionado);
     const codigoTemplate = documento?.codigoTemplate;
 
-    this.documentoService.getDocumentoGenerado(this.nunico, codigoTemplate!).subscribe({
+    if (!documento || !codigoTemplate) {
+      this.service.add({ severity: 'error', summary: 'Error', detail: 'No se encontró el documento o el template.' });
+      return;
+    }
+
+    this.documentoService.getDocumentoGenerado(this.nunico, codigoTemplate, documento.idDocumento).subscribe({
       next: (resp) => {
         if (resp.success) {
           this.contenidoHTML = this.procesarHTML(resp.contentHTML);
