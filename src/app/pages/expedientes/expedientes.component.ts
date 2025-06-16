@@ -414,7 +414,8 @@ generarDocumento() {
     this.documentoService.getDocumentoGenerado(this.nunico, codigoTemplate, documento.idDocumento).subscribe({
       next: (resp) => {
         if (resp.success) {
-          this.contenidoHTML = this.procesarHTML(resp.contentHTML);
+          this.contenidoHTML = resp.contentHTML;
+          // this.contenidoHTML = this.procesarHTML(resp.contentHTML);
           this.contenidoHTMLAnimado = '';
           this.isTypingWord = false;
           
