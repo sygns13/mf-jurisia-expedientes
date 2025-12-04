@@ -75,6 +75,7 @@ export class ExpedientesComponent {
   isTypingWord: boolean = false;
   loaderMessage: string = '';
   nunico: number = 0;
+  numIncidente: string = '0';
 
   documentosFiltrados: Documento[] = [];
   documentos: Documento[] = [];
@@ -311,6 +312,7 @@ export class ExpedientesComponent {
     this.tipoDocumentoSeleccionado = null;
     this.documentosFiltrados = [];
     this.nunico=expediente.nunico;
+    this.numIncidente = expediente.numIncidente;
     if (expediente) {
       this.tipoDocumentosFiltrados = this.tipoDocumentos.filter(tipoDocumentos => tipoDocumentos.idInstancia === expediente.codigoInstancia);
     } else {
@@ -333,9 +335,9 @@ descargarDocumento() {
   const documento = this.documentos.find(d => d.idDocumento === this.documentoSeleccionado);
   const codigoTemplate = documento?.codigoTemplate;
   const nameDoc = documento?.descripcion;
-  if (!codigoTemplate || !this.nunico) return;
+  if (!codigoTemplate || !this.nunico || !this.numIncidente) return;
 
-  this.documentoService.descargarDocx(this.nunico, codigoTemplate, documento.idDocumento).subscribe({
+  this.documentoService.descargarDocx(this.nunico, this.numIncidente, codigoTemplate, documento.idDocumento).subscribe({
     next: (response: Blob) => {
       const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
       const url = window.URL.createObjectURL(blob);
@@ -367,9 +369,9 @@ descargarDocumentoDirecto() {
   const documento = this.documentos.find(d => d.idDocumento === this.documentoSeleccionado);
   const codigoTemplate = documento?.codigoTemplate;
   const nameDoc = documento?.descripcion;
-  if (!codigoTemplate || !this.nunico) return;
+  if (!codigoTemplate || !this.nunico || !this.numIncidente) return;
 
-  this.documentoService.descargarDocx(this.nunico, codigoTemplate, documento.idDocumento).subscribe({
+  this.documentoService.descargarDocx(this.nunico, this.numIncidente, codigoTemplate, documento.idDocumento).subscribe({
     next: (response: Blob) => {
       const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
       const url = window.URL.createObjectURL(blob);
@@ -410,10 +412,11 @@ generarDocumento() {
       this.service.add({ severity: 'error', summary: 'Error', detail: 'No se encontró el documento o el template.' });
       return;
     }
-
-    this.documentoService.getDocumentoGenerado(this.nunico, codigoTemplate, documento.idDocumento).subscribe({
+    this.isTyping = true;
+    this.documentoService.getDocumentoGenerado(this.nunico, this.numIncidente, codigoTemplate, documento.idDocumento).subscribe({
       next: (resp) => {
         if (resp.success) {
+          this.isTyping = false;
           this.contenidoHTML = resp.contentHTML;
           // this.contenidoHTML = this.procesarHTML(resp.contentHTML);
           this.contenidoHTMLAnimado = '';
@@ -434,7 +437,7 @@ generarDocumento() {
     });
   }
 
-simularEscritura(html: string) {
+/* simularEscritura(html: string) {
   this.isTypingWord = true;
   this.contenidoHTMLAnimado = '';
   let i = 0;
@@ -458,8 +461,43 @@ simularEscritura(html: string) {
       setTimeout(() => this.scrollPreviewBottom(), 500);
     }
   }, this.velocidadEscritura);
-}
-
+} */
+  simularEscritura(html: string) {
+    this.isTypingWord = true;
+    this.contenidoHTMLAnimado = '';
+    let i = 0;
+  
+    const velocidadPorCaracter = this.velocidadEscritura; // en ms
+    const total = html.length;
+    let lastTime = performance.now();
+  
+    const loop = (time: number) => {
+      const elapsed = time - lastTime;
+  
+      if (elapsed >= velocidadPorCaracter) {
+        const nextChunk = Math.floor(elapsed / velocidadPorCaracter);
+        for (let j = 0; j < nextChunk && i < total; j++, i++) {
+          this.contenidoHTMLAnimado += html.charAt(i);
+        }
+        lastTime = time;
+        if (i > 200) {
+          this.conditionalScroll();
+        }
+      }
+  
+      if (i < total) {
+        requestAnimationFrame(loop);
+      } else {
+        this.isTypingWord = false;
+        this.addFullDocumentClass();
+        setTimeout(() => this.scrollPreviewBottom(), 500);
+      }
+    };
+  
+    this.forceScrollToTop();
+    requestAnimationFrame(loop);
+  }
+  
 forceScrollToTop() {
   const resetScroll = () => {
     if (this.scrollContainer && this.scrollContainer.nativeElement) {

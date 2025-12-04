@@ -54,4 +54,5 @@ export interface Expediente {
   descUbicacion: string;
   tipoExpediente: string;
   nunico: number;
+  numIncidente: string;
 }
