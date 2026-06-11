@@ -256,12 +256,12 @@ export class ExpedientesComponent {
   }
 
   onSedeChange(event: any) {
-    this.instanciaSeleccionada = null; 
+    this.instanciaSeleccionada = null;
     this.especialidadesFiltradas = [];
     if (this.sedeSeleccionada) {
       this.instanciasFiltradas = this.instancias.filter(instancia => instancia.codigoSede === this.sedeSeleccionada);
     } else {
-      this.instanciasFiltradas = []; 
+      this.instanciasFiltradas = [];
     }
   }
 
@@ -337,6 +337,12 @@ descargarDocumento() {
   const nameDoc = documento?.descripcion;
   if (!codigoTemplate || !this.nunico || !this.numIncidente) return;
 
+  this.isTyping = true;
+  this.loaderMessage = 'Preparando documento...'
+
+  this.isTyping = true;
+  this.loaderMessage = 'Preparando documento...'
+
   this.documentoService.descargarDocx(this.nunico, this.numIncidente, codigoTemplate, documento.idDocumento).subscribe({
     next: (response: Blob) => {
       const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
@@ -346,6 +352,8 @@ descargarDocumento() {
       link.download = nameDoc+'-'+this.nunico+'.docx';
       link.click();
       window.URL.revokeObjectURL(url);
+      this.botonLoader=true;
+      this.loaderMessage = 'Documento Generado, revise sus descargas'
     },
     error: () => {
       this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo descargar el documento.' });
@@ -408,6 +416,12 @@ generarDocumento() {
     const documento = this.documentos.find(d => d.idDocumento === this.documentoSeleccionado);
     const codigoTemplate = documento?.codigoTemplate;
 
+    this.isTyping = true;
+    this.loaderMessage = 'Preparando documento...'
+
+    this.isTyping = true;
+    this.loaderMessage = 'Preparando documento...'
+
     if (!documento || !codigoTemplate) {
       this.service.add({ severity: 'error', summary: 'Error', detail: 'No se encontró el documento o el template.' });
       return;
@@ -421,12 +435,15 @@ generarDocumento() {
           // this.contenidoHTML = this.procesarHTML(resp.contentHTML);
           this.contenidoHTMLAnimado = '';
           this.isTypingWord = false;
-          
+
+          this.isTyping = false;
+          this.loaderMessage = ''
+
           this.mostrarDialogoPreview = true;
           setTimeout(() => {
             // Pasar el HTML ya procesado a la simulación de escritura
             this.simularEscritura(this.contenidoHTML);
-          }, 500); 
+          }, 500);
         } else {
           this.service.add({ severity: 'warn', summary: 'Advertencia', detail: 'El documento no se generó correctamente.' });
         }
@@ -441,21 +458,21 @@ generarDocumento() {
   this.isTypingWord = true;
   this.contenidoHTMLAnimado = '';
   let i = 0;
-  
+
   this.forceScrollToTop();
-  
+
   const intervalo = setInterval(() => {
     this.contenidoHTMLAnimado += html.charAt(i);
     i++;
-    
-    if (i > 200) { 
+
+    if (i > 200) {
       this.conditionalScroll();
     }
-    
+
     if (i >= html.length) {
       clearInterval(intervalo);
       this.isTypingWord = false;
-      
+
       this.addFullDocumentClass();
 
       setTimeout(() => this.scrollPreviewBottom(), 500);
@@ -466,14 +483,14 @@ generarDocumento() {
     this.isTypingWord = true;
     this.contenidoHTMLAnimado = '';
     let i = 0;
-  
+
     const velocidadPorCaracter = this.velocidadEscritura; // en ms
     const total = html.length;
     let lastTime = performance.now();
-  
+
     const loop = (time: number) => {
       const elapsed = time - lastTime;
-  
+
       if (elapsed >= velocidadPorCaracter) {
         const nextChunk = Math.floor(elapsed / velocidadPorCaracter);
         for (let j = 0; j < nextChunk && i < total; j++, i++) {
@@ -484,7 +501,7 @@ generarDocumento() {
           this.conditionalScroll();
         }
       }
-  
+
       if (i < total) {
         requestAnimationFrame(loop);
       } else {
@@ -493,18 +510,18 @@ generarDocumento() {
         setTimeout(() => this.scrollPreviewBottom(), 500);
       }
     };
-  
+
     this.forceScrollToTop();
     requestAnimationFrame(loop);
   }
-  
+
 forceScrollToTop() {
   const resetScroll = () => {
     if (this.scrollContainer && this.scrollContainer.nativeElement) {
       this.scrollContainer.nativeElement.scrollTop = 0;
     }
   };
-  
+
   resetScroll();
   setTimeout(resetScroll, 10);
   setTimeout(resetScroll, 50);
@@ -513,15 +530,15 @@ forceScrollToTop() {
 
 conditionalScroll() {
   if (!this.scrollContainer?.nativeElement) return;
-  
+
   const scrollElement = this.scrollContainer.nativeElement;
   const containerHeight = scrollElement.clientHeight;
   const contentHeight = scrollElement.scrollHeight;
   const currentScroll = scrollElement.scrollTop;
-  
+
   if (contentHeight > containerHeight) {
     const distanceFromBottom = contentHeight - (currentScroll + containerHeight);
-    
+
     if (distanceFromBottom < 200) {
       scrollElement.scrollTo({
         top: contentHeight - containerHeight + 50,
@@ -541,7 +558,7 @@ addFullDocumentClass() {
 
 scrollPreviewBottom() {
   if (!this.scrollContainer?.nativeElement) return;
-  
+
   const scrollElement = this.scrollContainer.nativeElement;
   scrollElement.scrollTo({
     top: scrollElement.scrollHeight,
@@ -552,7 +569,7 @@ scrollPreviewBottom() {
 close() {
   this.displayGenerarDocumentos = false;
   this.mostrarDialogoPreview = false;
-  
+
   this.contenidoHTMLAnimado = '';
   this.isTypingWord = false;
 
@@ -563,7 +580,7 @@ close() {
 
   private procesarTexto(texto: string): string {
   let textoProcessado = texto;
-  
+
   // 1. PRIMERO: Procesar palabras con dos puntos para crear títulos/secciones
   // Captura palabras que terminan en ":" (pueden ser mayúsculas o minúsculas)
   // Ejemplo: "Tercero:", "Cuarto:", "CONSIDERANDO:", etc.
@@ -571,7 +588,7 @@ close() {
     /\b([A-ZÁÉÍÓÚÑÜ][a-záéíóúñüA-ZÁÉÍÓÚÑÜ\s]*[a-záéíóúñüA-ZÁÉÍÓÚÑÜ]):\s*/g,
     '<br><strong class="title-section">$1:</strong><br>'
   );
-  
+
   // 2. SEGUNDO: Procesar todas las palabras en MAYÚSCULAS (incluyendo números y caracteres especiales)
   // Este regex captura:
   // - Palabras completamente en mayúsculas
@@ -588,33 +605,33 @@ close() {
       return match;
     }
   );
-  
+
   // 3. TERCERO: Procesar casos especiales como números de expediente
   // Ejemplo: "N° 123-2024", "EXP N° 456-2023", etc.
   textoProcessado = textoProcessado.replace(
     /\b(N°?\s*\d+(?:[-\/]\d+)*)\b/gi,
     '<strong>$1</strong>'
   );
-  
+
   // 4. CUARTO: Procesar años (4 dígitos) que no estén ya en negritas
   textoProcessado = textoProcessado.replace(
     /\b(19\d{2}|20\d{2})\b(?![^<]*<\/strong>)/g,
     '<strong>$1</strong>'
   );
-  
+
   // 5. QUINTO: Limpiar casos donde se aplicó negrita múltiples veces
   textoProcessado = textoProcessado.replace(
     /<strong><strong>(.*?)<\/strong><\/strong>/g,
     '<strong>$1</strong>'
   );
-  
+
   // 6. SEXTO: Limpiar múltiples saltos de línea consecutivos
   textoProcessado = textoProcessado.replace(/(<br>\s*){3,}/g, '<br><br>');
-  
+
   // 7. SÉPTIMO: Limpiar saltos de línea al inicio y final
   textoProcessado = textoProcessado.replace(/^(<br>\s*)+/, '');
   textoProcessado = textoProcessado.replace(/(<br>\s*)+$/, '');
-  
+
   return textoProcessado;
 }
 
@@ -622,27 +639,27 @@ close() {
 private procesarHTML(contentHTML: string): string {
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = contentHTML;
-  
+
   const paragraphs = tempDiv.querySelectorAll('p');
-  
+
   paragraphs.forEach(p => {
     const text = p.textContent || '';
     const processedHTML = this.procesarTexto(text);
     p.innerHTML = processedHTML;
-    
+
     // Aplicar justificación de manera más robusta
     p.style.textAlign = 'justify';
     p.style.setProperty('text-justify', 'inter-word');
     p.style.wordSpacing = 'normal';
     p.style.letterSpacing = 'normal';
-  }); 
-  
+  });
+
   // Si no hay párrafos, procesar el contenido completo
   if (paragraphs.length === 0) {
     const processedHTML = this.procesarTexto(tempDiv.textContent || '');
     tempDiv.innerHTML = `<p style="text-align: justify; text-justify: inter-word;">${processedHTML}</p>`;
   }
-  
+
   return tempDiv.innerHTML;
 }
 
