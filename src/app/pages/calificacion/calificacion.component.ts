@@ -308,12 +308,38 @@ export class CalificacionComponent {
         this.docxBlob = blob;
         this.listarDemandasCalificadas();
       },
-      error: () => {
+      error: (err: any) => {
         this.detenerProgreso();
         this.cargandoCalificacion = false;
-        this.service.add({ severity: 'error', summary: 'Error', detail: 'No se pudo calificar la demanda. Consulte al Administrador del Sistema.' });
+        this.displayCalificarDemanda = false;
+        this.mostrarErrorCalificacion(err);
       }
     });
+  }
+
+  private mostrarErrorCalificacion(err: any) {
+    const textoBase = 'No se pudo calificar la demanda. Consulte al Administrador del Sistema.';
+    const mostrar = (mensaje?: string) => {
+      const detail = mensaje ? `${textoBase}\n${mensaje}` : textoBase;
+      this.service.add({ severity: 'error', summary: 'Error', detail });
+    };
+
+    const cuerpo = err?.error;
+    // El endpoint responde con responseType 'blob', por lo que el JSON de error
+    // viene envuelto en un Blob y hay que leerlo como texto antes de parsearlo.
+    if (cuerpo instanceof Blob) {
+      cuerpo.text()
+        .then((texto) => {
+          try {
+            mostrar(JSON.parse(texto)?.mensaje);
+          } catch {
+            mostrar();
+          }
+        })
+        .catch(() => mostrar());
+    } else {
+      mostrar(cuerpo?.mensaje);
+    }
   }
 
   private iniciarProgreso() {
