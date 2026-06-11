@@ -1,0 +1,95 @@
+.container {
+  padding: 1.5rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.info-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+}
+
+.info-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.info-label {
+  font-weight: bold;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.info-value {
+  color: #111827;
+}
+
+.results-table {
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.backbutton {
+  background-color: #6b7280 !important;
+  border: 1px solid #9ca3af !important;
+  padding-bottom: 0.7rem !important;
+  padding-top: 0.7rem !important;
+  color: white;
+  border-radius: 0.375rem;
+
+  &:hover {
+    background-color: #4b5563 !important;
+  }
+}
+
+.redbutton {
+  background-color: #b00600 !important;
+  border: 1px solid #f76969 !important;
+  padding-bottom: 0.7rem !important;
+  padding-top: 0.7rem !important;
+  color: white;
+  border-radius: 0.375rem;
+
+  &:hover {
+    background-color: #ef4444 !important;
+  }
+}
+
+:host ::ng-deep .p-datatable-gridlines .p-datatable-thead > tr > th {
+  background-color: #f1f5f9 !important;
+}
+
+:host ::ng-deep .p-button {
+  border-color: #b00600 !important;
+  background-color: #b00600 !important;
+  border: 1px solid #f76969 !important;
+  color: white !important;
+
+  &:hover {
+    background-color: #ef4444 !important;
+  }
+}
+
+::ng-deep .p-dialog .p-dialog-header {
+  background-color: #b00600 !important;
+  border-color: #b00600 !important;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}

@@ -4,6 +4,8 @@ export interface BusquedaExpediente {
   especialidad: string;
   numero: number;
   anio: number;
+  fechaInicio?: string;
+  fechaFinal?: string;
 }
 
 export interface Sede {
@@ -55,4 +57,59 @@ export interface Expediente {
   tipoExpediente: string;
   nunico: number;
   numIncidente: string;
+}
+
+export interface DemandaCalificada {
+  id: number;
+  anio: string;
+  expNro: string;
+  tipoExpediente: string;
+  xformato: string;
+  xnomInstancia: string;
+  xdescMateria: string;
+  model: string;
+  status: number;
+  fechaSend: string;
+  fechaResponse: string;
+  timeSeconds: number;
+  nunico: number;
+  archivos?: string[];
+  xip?: string;
+  cclave?: string;
+  cusuario?: string;
+  xrutaArchivo?: string;
+  rutaCompleta?: string;
+}
+
+export interface PagedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface ExpedienteCalificar {
+  nUnico: number;
+  anio: string;
+  expNro: string;
+  xFormato: string;
+  cMateria: string;
+  cEspecialidad: string;
+  cInstancia: string;
+  xNomInstancia: string;
+  xDescMateria: string;
+  fInicio: string;
+  xDescEstado: string;
+  cUbicacion: string;
+  xDescUbicacion: string;
+  tipoExpediente: string;
+  xIp: string;
+  cUsuario: string;
+  cClave: string;
+  xRutaArchivo: string;
+  xNombreArchivo: string;
+  rutaCompleta: string;
+  nIncidente: string;
+  archivos?: string[];
 }

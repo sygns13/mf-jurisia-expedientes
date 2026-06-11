@@ -1,0 +1,434 @@
+<p-toast />
+<div class="container">
+  <p-fluid class="flex flex-col md:flex-row gap-8">
+    <div class="md:w-1/2">
+      <div class="card flex flex-col gap-4">
+        <h3>Calificación de Demandas</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; margin-top: 0.5rem;">
+          <div style="flex: 0 0 calc(28% - 16px); box-sizing: border-box;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label>Fecha de Inicio</label>
+              <p-datepicker [(ngModel)]="fechaInicioExpedientes" dateFormat="dd-mm-yy" placeholder="DD-MM-YYYY" [showIcon]="true"></p-datepicker>
+            </div>
+          </div>
+          <div style="flex: 0 0 calc(28% - 16px); box-sizing: border-box;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label>Fecha Final</label>
+              <p-datepicker [(ngModel)]="fechaFinalExpedientes" dateFormat="dd-mm-yy" placeholder="DD-MM-YYYY" [showIcon]="true"></p-datepicker>
+            </div>
+          </div>
+          <div style="flex: 0 0 auto;">
+            <button pButton label="Listar Expedientes" icon="pi pi-search" (click)="buscarExpedientes()" class="redbutton" [style]="{ width: 'auto' }"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </p-fluid>
+
+  <br>
+
+  <!--Loader ApuBot-->
+  <p-dialog
+    [(visible)]="isTyping"
+    modal="true"
+    [closable]="false"
+    [dismissableMask]="true"
+    [draggable]="false"
+    class="dialog-typing"
+    [style]="{ width: '300px' }"
+  >
+    <ng-template pTemplate="header">
+      <div class="dialog-header-centered">
+        <i class="pi pi-info-circle icon-alert" style="font-size: 1.2rem;color: #ffffff"></i>
+        <span class="title-text" style="font-size: 1.2rem;margin-left: 0.8rem;color: #ffffff;font-weight: bold">{{ loaderMessage }}</span>
+      </div>
+    </ng-template>
+
+    <div class="dialog-content">
+      <object
+        data="assets/animations/ApuBotTyping.svg"
+        type="image/svg+xml"
+        class="typing-animation">
+      </object>
+      <div class="boton-centrado">
+        <button *ngIf="botonLoader"
+                pButton
+                label="Aceptar"
+                class="redbutton"
+                style="margin-top: 1rem;"
+                (click)="cerrarLoader()">
+        </button>
+      </div>
+    </div>
+  </p-dialog>
+  <!--END LOADER-->
+
+  <div class="p-fluid box">
+    <div class="p-field p-grid">
+      <div class="results-table">
+        <p-table [value]="expedientes" showGridlines [responsiveLayout]="'scroll'">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Expediente</th>
+              <th>Instancia Actual</th>
+              <th>Ubicación</th>
+              <th>Estado</th>
+              <th>Tipo Expediente</th>
+              <th>Archivos</th>
+              <th>Acciones</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-expediente>
+            <tr>
+              <td>{{ expediente.xformato }}</td>
+              <td>{{ expediente.xnomInstancia }}</td>
+              <td>{{ expediente.xdescUbicacion }}</td>
+              <td>{{ expediente.xdescEstado }}</td>
+              <td>{{ expediente.xdescMateria }}</td>
+              <td>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;">
+                  <button *ngFor="let archivo of expediente.archivos"
+                          pButton
+                          [label]="getEtiquetaArchivo(expediente.archivos, archivo)"
+                          icon="pi pi-file-pdf"
+                          (click)="verPdf(expediente, archivo)"
+                          class="p-button-outlined p-button-danger"
+                          [pTooltip]="archivo"
+                          tooltipPosition="top"
+                          [style]="{ width: 'auto' }">
+                  </button>
+                </div>
+              </td>
+              <td>
+                <p-button label="Calificar Demanda" icon="pi pi-microchip-ai" (onClick)="abrirCalificarDemanda(expediente)" pTooltip="Calificar Demanda con Inteligencia Artificial"></p-button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7">No se encontraron expedientes.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <br>
+
+  <!-- DEMANDAS CALIFICADAS -->
+  <div class="p-fluid box" *ngIf="!mostrarDetalle">
+    <div class="p-field p-grid">
+      <h3 style="margin-bottom: 1rem;">Demandas Calificadas</h3>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 1rem; align-items: flex-end;">
+        <div style="flex: 0 0 calc(25% - 16px); box-sizing: border-box;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label>Fecha de Inicio</label>
+            <p-datepicker [(ngModel)]="filtroFechaInicio" dateFormat="dd-mm-yy" placeholder="DD-MM-YYYY" [showIcon]="true"></p-datepicker>
+          </div>
+        </div>
+        <div style="flex: 0 0 calc(25% - 16px); box-sizing: border-box;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label>Fecha Fin</label>
+            <p-datepicker [(ngModel)]="filtroFechaFin" dateFormat="dd-mm-yy" placeholder="DD-MM-YYYY" [showIcon]="true"></p-datepicker>
+          </div>
+        </div>
+        <div style="flex: 0 0 calc(20% - 16px); box-sizing: border-box;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label>Nro de Expediente</label>
+            <input pInputText [(ngModel)]="filtroNroExpediente" placeholder="Ej: 00272" appSoloNumerosEnteros />
+          </div>
+        </div>
+        <div style="flex: 0 0 calc(15% - 16px); box-sizing: border-box;">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label>Año</label>
+            <input pInputText [(ngModel)]="filtroAnio" placeholder="Ej: 2026" appSoloNumerosEnteros />
+          </div>
+        </div>
+        <div style="flex: 0 0 auto;">
+          <button pButton label="Buscar" icon="pi pi-search" (click)="listarDemandasCalificadas()" class="redbutton" [style]="{ width: 'auto' }"></button>
+        </div>
+      </div>
+
+      <div class="results-table">
+        <p-table [value]="demandasCalificadas" showGridlines [responsiveLayout]="'scroll'">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>#</th>
+              <th>Expediente</th>
+              <th>Instancia</th>
+              <th>Materia</th>
+              <th>Tipo Expediente</th>
+              <th>Acciones</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+            <tr>
+              <td>{{ pageDemandasCalificadas * sizeDemandasCalificadas + rowIndex + 1 }}</td>
+              <td>{{ item.xformato }}</td>
+              <td>{{ item.xnomInstancia }}</td>
+              <td>{{ item.xdescMateria }}</td>
+              <td>{{ item.tipoExpediente }}</td>
+              <!-- <td>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;">
+                  <button *ngFor="let archivo of item.archivos; let i = index"
+                          pButton
+                          [label]="'PDF ' + (i + 1)"
+                          icon="pi pi-file-pdf"
+                          (click)="verPdf(item, archivo)"
+                          class="p-button-outlined p-button-danger"
+                          [pTooltip]="archivo"
+                          tooltipPosition="top"
+                          [style]="{ width: 'auto' }">
+                  </button>
+                </div>
+              </td> -->
+              <td>
+                <button pButton label="Ver Detalle" icon="pi pi-eye" (click)="verDetalle(item.nunico)" class="redbutton" [style]="{ width: 'auto' }"></button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7">No se encontraron demandas calificadas.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+        <p-paginator
+          *ngIf="totalDemandasCalificadas > 0"
+          [rows]="sizeDemandasCalificadas"
+          [totalRecords]="totalDemandasCalificadas"
+          (onPageChange)="onPageChangeDemandasCalificadas($event)"
+          [rowsPerPageOptions]="[10, 20, 50]">
+        </p-paginator>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETALLE DE CALIFICACIONES POR DEMANDA -->
+  <div class="p-fluid box" *ngIf="mostrarDetalle">
+    <div class="p-field p-grid">
+
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+        <button pButton label="Volver" icon="pi pi-arrow-left" (click)="volverAlListado()" class="p-button-outlined p-button-secondary" [style]="{ width: 'auto' }"></button>
+        <h3 style="margin: 0;">Detalle de Calificaciones</h3>
+      </div>
+
+      <div *ngIf="expedienteDetalleInfo" style="background: #f8fafc; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem 2rem;">
+        <div><strong>Expediente:</strong> {{ expedienteDetalleInfo.xformato }}</div>
+        <div><strong>Instancia:</strong> {{ expedienteDetalleInfo.xnomInstancia }}</div>
+        <div><strong>Materia:</strong> {{ expedienteDetalleInfo.xdescMateria }}</div>
+        <div><strong>Tipo:</strong> {{ expedienteDetalleInfo.tipoExpediente }}</div>
+      </div>
+
+      <div class="results-table">
+        <p-table [value]="demandasDetalle" showGridlines [responsiveLayout]="'scroll'" [loading]="cargandoDetalle">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>#</th>
+              <th>Expediente</th>
+              <th>Envio</th>
+              <th>Respuesta</th>
+              <th>Tiempo de calificación (seg)</th>
+              <th>Acción</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+            <tr>
+              <td>{{ rowIndex + 1 }}</td>
+              <td>{{ item.xformato }}</td>
+              <td>{{ item.fechaSend | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+              <td>{{ item.fechaResponse | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+              <td>{{ item.timeSeconds | number:'1.0-2' }}</td>
+              <td>
+                <button pButton
+                        label="Descargar Word"
+                        icon="pi pi-download"
+                        (click)="descargarCalificacionDetalle(item.id, item.xformato)"
+                        class="redbutton"
+                        [style]="{ width: 'auto' }">
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6">No se encontraron calificaciones para esta demanda.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL CALIFICAR DEMANDA -->
+<p-dialog [(visible)]="displayCalificarDemanda"
+          [breakpoints]="{ '960px': '75vw' }"
+          [style]="{ width: '38vw' }"
+          [modal]="true"
+          [closable]="!cargandoCalificacion"
+          [contentStyle]="{ 'overflow': 'visible' }"
+          (onHide)="cerrarCalificarDemanda()">
+  <ng-template #header>
+    <div class="inline-flex items-center justify-center gap-2" style="color: white;">
+      <span class="font-bold whitespace-nowrap">CALIFICAR DEMANDA</span>
+    </div>
+  </ng-template>
+
+  <div style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0;">
+
+    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <div><strong>JUZGADO:</strong> {{ expedienteSeleccionado?.xnomInstancia }}</div>
+      <div><strong>EXPEDIENTE:</strong> {{ expedienteSeleccionado?.xformato }}</div>
+    </div>
+
+    <!-- FASE 1: Subida a la nube -->
+    <div *ngIf="cargandoCalificacion && faseAnimacion === 1" class="fase-animacion-wrapper">
+      <div class="cloud-upload-wrapper">
+        <i class="pi pi-cloud-upload cloud-icon" 
+          style="font-size: 80px !important; width: 80px !important; height: 80px !important; color: #ef4444 !important; display: inline-flex; align-items: center; justify-content: center;">
+        </i>
+        <div class="upload-dots-row">
+          <span class="upload-dot" style="background-color: #ef4444!important;"></span>
+          <span class="upload-dot" style="background-color: #ef4444!important;"></span>
+          <span class="upload-dot" style="background-color: #ef4444!important;"></span>
+        </div>
+      </div>
+      <span class="fase-texto" style="font-size: 1.15rem!important;">Cargando las demandas (PDF) a la nube de ApuBot...</span>
+    </div>
+
+    <!-- FASE 2: ApuBot analizando -->
+    <div *ngIf="cargandoCalificacion && faseAnimacion === 2" class="fase-animacion-wrapper">
+      <object data="assets/animations/ApuBotTyping.svg"
+              type="image/svg+xml"
+              style="height: 140px;">
+      </object>
+      <span class="fase-texto" style="font-size: 1.15rem!important;">Apubot está analizando y redactando la calificación de la demanda...</span>
+    </div>
+
+    <!-- Barra de progreso y estado -->
+    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      <p-progressBar [value]="progresoCalificacion" [showValue]="true"></p-progressBar>
+      <div *ngIf="!cargandoCalificacion && docxBlob"
+           style="color: #16a34a; font-weight: bold; font-size: 1.15rem!important; text-align: center;">
+        ¡Documento generado exitosamente!
+      </div>
+    </div>
+
+  </div>
+
+  <ng-template #footer>
+    <div style="width: 100%;">
+      <hr style="width: 100%; border: none; border-top: 1px solid #ccc; margin-bottom: 1rem; margin-top: 0!important;">
+      <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+        <button pButton
+                label="Cancelar"
+                icon="pi pi-times"
+                (click)="cancelarCalificarDemanda()"
+                class="p-button-outlined p-button-secondary"
+                [style]="{ width: 'auto' }">
+        </button>
+        <button pButton
+                label="Descargar Demanda Calificada"
+                icon="pi pi-download"
+                [disabled]="!docxBlob"
+                (click)="descargarDemandaCalificada()"
+                class="redbutton"
+                [style]="{ width: 'auto' }">
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+<!-- END MODAL CALIFICAR DEMANDA -->
+
+<!-- MODAL VISOR PDF -->
+<p-dialog
+  [(visible)]="modalPdfVisible"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="false"
+  [draggable]="false"
+  [baseZIndex]="12000"
+  [style]="{ width: '60vw' }"
+  [contentStyle]="{ padding: '0', overflow: 'hidden' }"
+  (onHide)="cerrarModalPdf()">
+  <ng-template #header>
+    <div class="inline-flex items-center justify-center gap-2" style="color: white; overflow: hidden; max-width: 70vw;">
+      <i class="pi pi-file-pdf" style="font-size: 1.1rem;"></i>
+      <span class="font-bold whitespace-nowrap" style="overflow: hidden; text-overflow: ellipsis;">{{ pdfNombreActual }}</span>
+    </div>
+  </ng-template>
+
+  <div style="width: 100%; height: 80vh; display: flex; align-items: center; justify-content: center;">
+    <div *ngIf="cargandoPdf" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+      <object data="assets/animations/ApuBotTyping.svg" type="image/svg+xml" style="width: 60px; height: 50px;"></object>
+      <span style="color: #666; font-style: italic;">Cargando PDF...</span>
+    </div>
+    <iframe
+      *ngIf="!cargandoPdf && pdfSafeUrl"
+      [src]="pdfSafeUrl"
+      style="width: 100%; height: 100%; border: none;"
+      type="application/pdf">
+    </iframe>
+  </div>
+
+  <ng-template #footer>
+    <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 1rem;">
+      <button pButton
+              label="Abrir en nueva pestaña"
+              icon="pi pi-external-link"
+              (click)="abrirPdfEnNuevaPestana()"
+              class="p-button-outlined p-button-info"
+              [style]="{ width: 'auto' }">
+      </button>
+      <button pButton
+              label="Cerrar"
+              icon="pi pi-times"
+              (click)="cerrarModalPdf()"
+              class="p-button-outlined p-button-secondary"
+              [style]="{ width: 'auto' }">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+<!-- END MODAL VISOR PDF -->
+
+<p-dialog
+  [(visible)]="mostrarDialogoPreview"
+  [modal]="true"
+  [closable]="!isTypingWord"
+  [dismissableMask]="false"
+  [baseZIndex]="11000"
+  [style]="{ width: '50vw', height: '100vh' }"
+  [contentStyle]="{ overflow: 'hidden', background: '#e5e7eb', padding: '3rem', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }"
+  [draggable]="false"
+>
+  <ng-template #header>
+    <div class="inline-flex items-center justify-center gap-2" style="color: white;">
+      <span class="font-bold whitespace-nowrap">GENERANDO DOCUMENTO CON APUBOT</span>
+    </div>
+  </ng-template>
+
+  <div #scrollContainer class="scroll-container">
+    <div #contenidoContainer class="word-sheet">
+      <div [innerHTML]="contenidoHTMLAnimado"></div>
+      <div *ngIf="isTypingWord" style="display: flex; align-items: center; margin-top: 1rem;">
+        <object data="assets/animations/ApuBotTyping.svg" type="image/svg+xml" width="40" height="40"></object>
+        <span style="margin-left: 1rem; font-style: italic;">Redactando su Documento...</span>
+      </div>
+      <button *ngIf="!isTypingWord"
+              pButton
+              label="Descargar Word"
+              icon="pi pi-download"
+              class="p-button-success"
+              style="margin-top: 1rem;"
+              (click)="descargarDocumento()">
+      </button>
+    </div>
+  </div>
+</p-dialog>
