@@ -111,5 +111,9 @@ export interface ExpedienteCalificar {
   xNombreArchivo: string;
   rutaCompleta: string;
   nIncidente: string;
+  xDescDemandado: string;
+  xDescDemandante: string;
+  xDescJuez: string;
+  xDescEspecialista: string;
   archivos?: string[];
 }
