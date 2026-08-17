@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { ExpedientesComponent } from './expedientes/expedientes.component';
 import { CalificacionComponent } from './calificacion/calificacion.component';
+import { SentenciaComponent } from './sentencia/sentencia.component';
 
 export const authRoutes: Routes = [
     {
@@ -16,6 +17,10 @@ export const authRoutes: Routes = [
             {
                 path: 'calificar-demanda',
                 component: CalificacionComponent,
+            },
+            {
+                path: 'sentenciar-demanda',
+                component: SentenciaComponent,
             },
             {
                 path: '**',

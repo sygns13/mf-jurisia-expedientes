@@ -81,6 +81,24 @@ export interface DemandaCalificada {
   rutaCompleta?: string;
 }
 
+export interface DocumentoDigital {
+  nUnico: number;
+  xFormato: string;
+  lTipoDoc: string;
+  fRegistro?: string;
+  // Solo viene informado para resoluciones (l_tipo_doc = 'R').
+  actoProcesal?: string;
+  descripcion?: string;
+  // Resoluciones, escritos y expediente principal traen sumilla; el resto llega vacía.
+  sumilla?: string;
+  xip: string;
+  cusuario: string;
+  cclave: string;
+  xrutaArchivo: string;
+  xnombreArchivo: string;
+  rutaCompleta: string;
+}
+
 export interface PagedResponse<T> {
   content: T[];
   totalElements: number;

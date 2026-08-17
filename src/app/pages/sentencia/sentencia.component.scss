@@ -1,0 +1,449 @@
+:host ::ng-deep .p-toast-detail {
+  white-space: pre-line;
+}
+
+:host ::ng-deep .p-paginator-page.p-paginator-page-selected {
+  background: #ef4444 !important;
+  color: white !important;
+  border: 1px solid #f76969 !important;
+}
+
+:host ::ng-deep .p-inputtext:enabled:focus {
+  border-color: #ef4444 !important;
+}
+
+:host ::ng-deep .p-datatable-gridlines .p-datatable-thead > tr > th {
+  background-color: #f1f5f9 !important;
+}
+
+.results-table{
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dialog-typing{
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.boton-centrado {
+  display: flex;
+  justify-content: center;
+}
+
+.redbutton {
+  background-color: #b00600 !important;
+  border: 1px solid #f76969 !important;
+  padding-bottom: 0.7rem !important;
+  padding-top: 0.7rem !important;
+  color: white;
+  border-radius: 0.375rem;
+
+  &:hover {
+    background-color: #ef4444 !important;
+  }
+}
+
+::ng-deep .p-dialog-content {
+  padding: 1.5rem !important;
+}
+
+:host ::ng-deep .p-select:not(.p-disabled).p-focus {
+  border-color: #b00600 !important;
+  box-shadow: 0 0 0 0.2rem rgba(176, 6, 0, 0.25) !important;
+}
+
+:host ::ng-deep .p-select-option.p-select-option-selected {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+:host ::ng-deep .p-button {
+  border-color: #b00600 !important;
+  background-color: #b00600 !important;
+  border: 1px solid #f76969 !important;
+  color: white !important;
+  &:hover {
+    background-color: #ef4444 !important;
+  }
+}
+
+::ng-deep .p-dialog .p-dialog-header {
+  background-color: #b00600 !important;
+  border-color: #b00600 !important;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.scroll-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f3f4;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
+}
+
+.word-sheet {
+  background-color: white;
+  padding: 3rem;
+  width: 794px;
+  min-height: auto;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  font-family: 'Arial', sans-serif;
+  font-size: 12pt;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+  margin: 1rem 0;
+
+  p {
+    margin-bottom: 1rem;
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    word-spacing: normal !important;
+    letter-spacing: normal !important;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    -moz-text-align-last: auto;
+    text-align-last: auto;
+  }
+
+  strong {
+    font-weight: bold !important;
+    color: #000 !important;
+    display: inline;
+    white-space: normal;
+  }
+
+  .title-section {
+    display: block !important;
+    font-weight: bold !important;
+    font-size: 1em;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: #000 !important;
+    text-align: left !important;
+    line-height: 1.4;
+
+    &::before {
+      content: '';
+      display: block;
+      height: 0.5rem;
+    }
+
+    &::after {
+      content: '';
+      display: block;
+      height: 0.3rem;
+    }
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    text-align: left !important;
+    color: #000;
+  }
+
+  em {
+    font-style: italic;
+    color: #000;
+  }
+
+  ul, ol {
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+
+    li {
+      margin-bottom: 0.5rem;
+      text-align: justify !important;
+      text-justify: inter-word !important;
+    }
+  }
+
+  &.full-document {
+    min-height: 1123px;
+  }
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  * {
+    text-align: inherit;
+  }
+
+  div, span {
+    text-align: justify;
+    text-justify: inter-word;
+  }
+
+  strong, em, span, a {
+    text-align: inherit;
+  }
+
+  &.typing {
+    .title-section {
+      min-height: 1.2em;
+    }
+
+    p {
+      text-align: justify !important;
+    }
+  }
+}
+
+.word-sheet strong {
+  animation: fadeInBold 0.3s ease-in-out;
+}
+
+@keyframes fadeInBold {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+.word-sheet {
+  -moz-text-align-last: auto;
+  -webkit-text-align-last: auto;
+  -ms-text-align-last: auto;
+
+  p {
+    text-align: justify;
+    text-align-last: left;
+    text-justify: inter-word;
+    word-spacing: 0.1em;
+  }
+}
+
+/* ===== MODAL SELECCIÓN DE DOCUMENTOS ===== */
+
+.doc-column {
+  flex: 1 1 0;
+  min-width: 280px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  background-color: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/* Listado largo (modal visor): se limita la altura y se desplaza dentro de la tarjeta. */
+.doc-column--scroll {
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.doc-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+
+  i {
+    color: #b00600;
+  }
+}
+
+.doc-column-title {
+  font-weight: bold;
+  font-size: 1.05rem;
+  color: #111827;
+}
+
+.doc-column-selall {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  label {
+    font-size: 0.85rem;
+    color: #555;
+    cursor: pointer;
+  }
+}
+
+.doc-column-sub {
+  margin: 0 0 0.25rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.doc-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px dashed #f1f5f9;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  label {
+    cursor: pointer;
+    color: #374151;
+  }
+
+  p-checkbox {
+    margin-top: 0.15rem;
+  }
+}
+
+.doc-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.doc-item-nombre {
+  font-weight: 500;
+  color: #111827;
+  word-break: break-word;
+}
+
+.doc-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.doc-item-acto {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background-color: #fdeceb;
+  border: 1px solid #f3c6c3;
+  color: #b00600;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.doc-item-fecha {
+  font-size: 0.75rem;
+  color: #6b7280;
+
+  i {
+    font-size: 0.7rem;
+    margin-right: 0.15rem;
+  }
+}
+
+/* La sumilla puede ser extensa: se recorta a 2 líneas y el texto completo va en el tooltip. */
+.doc-item-sumilla {
+  font-size: 0.8rem;
+  color: #4b5563;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+:host ::ng-deep .p-checkbox.p-checkbox-checked .p-checkbox-box {
+  background-color: #b00600 !important;
+  border-color: #b00600 !important;
+}
+
+/* ===== ANIMACIONES MODAL SENTENCIAR DEMANDA ===== */
+
+.fase-animacion-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 0 0.25rem;
+}
+
+.cloud-upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  .cloud-icon {
+    font-size: 3rem;
+    color: #3b82f6;
+    animation: cloudFloat 2s ease-in-out infinite;
+  }
+
+  .upload-dots-row {
+    display: flex;
+    gap: 0.9rem;
+
+    .upload-dot {
+      width: 9px;
+      height: 9px;
+      background-color: #3b82f6;
+      border-radius: 50%;
+      animation: floatUpDot 1.5s ease-in-out infinite;
+
+      &:nth-child(2) { animation-delay: 0.5s; }
+      &:nth-child(3) { animation-delay: 1s; }
+    }
+  }
+}
+
+.fase-texto {
+  font-style: italic;
+  color: #555;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+@keyframes cloudFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes floatUpDot {
+  0%   { opacity: 0; transform: translateY(10px); }
+  35%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* ===== FIN ANIMACIONES ===== */
+
+@media (max-width: 768px) {
+  .word-sheet {
+    width: 100%;
+    padding: 1.5rem;
+    margin: 0.5rem 0;
+    font-size: 11pt;
+
+    p {
+      text-align: justify !important;
+    }
+  }
+}
